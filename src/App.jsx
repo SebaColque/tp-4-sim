@@ -11,8 +11,11 @@ class Surtidor {
     this.finAtenciónCombustible
   }
 
-  cambiarFinAtencionCombustible(nuevoFinAtenciónCombustible) {
-    this.finAtenciónCombustible = nuevoFinAtenciónCombustible;
+  cambiarEstado(nuevoEstado) {
+    this.estado = nuevoEstado;
+  }
+  cambiarFinAtencionCombustible(nuevoFinAtención) {
+    this.finAtenciónCombustible = nuevoFinAtención;
   }
 }
 
@@ -21,6 +24,13 @@ class Lavadero {
 
   constructor() {
     this.estado = 'Libre';
+    this.finAtenciónLavadero
+  }
+  cambiarEstado(nuevoEstado) {
+    this.estado = nuevoEstado;
+  }
+  cambiarFinAtencionCombustible(nuevoFinAtención) {
+    this.finAtenciónLavadero = nuevoFinAtención;
   }
 }
 
@@ -29,6 +39,13 @@ class MantenimientoRapido {
 
   constructor() {
     this.estado = 'Libre';
+    this.finAtenciónMantenimiento
+  }
+  cambiarEstado(nuevoEstado) {
+    this.estado = nuevoEstado;
+  }
+  cambiarFinAtencionCombustible(nuevoFinAtención) {
+    this.finAtenciónMantenimiento = nuevoFinAtención;
   }
 }
 
@@ -37,6 +54,13 @@ class Cajero {
 
   constructor() {
     this.estado = 'Libre';
+    this.finAtenciónCajero
+  }
+  cambiarEstado(nuevoEstado) {
+    this.estado = nuevoEstado;
+  }
+  cambiarFinAtencionCombustible(nuevoFinAtención) {
+    this.finAtenciónCajero = nuevoFinAtención;
   }
 }
 
@@ -45,6 +69,13 @@ class Kiosco {
 
   constructor() {
     this.estado = 'Libre';
+    this.finAtenciónKiosco
+  }
+  cambiarEstado(nuevoEstado) {
+    this.estado = nuevoEstado;
+  }
+  cambiarFinAtencionCombustible(nuevoFinAtención) {
+    this.finAtenciónKiosco = nuevoFinAtención;
   }
 }
 
@@ -52,10 +83,22 @@ class Kiosco {
 class Cliente {
   constructor() {
     this.estado = ''; // Estado inicial: Esperando atención surtidor
+    this.horaLlegada = null;
+    this.posicionLlegada = null;
+    this.horaFinAtencion = null;
   }
 
   cambiarEstado(nuevoEstado) {
     this.estado = nuevoEstado;
+  }
+  cambiarHoraLlegada(nuevoHoraLlegada) {
+    this.horaLlegada = nuevoHoraLlegada;
+  }
+  cambiarPosicionLlegada(nuevaPosicionLlegada) {
+    this.posicionLlegada = nuevaPosicionLlegada;
+  }
+  cambiarHoraFinAtencion(nuevaHoraFinAtencion) {
+    this.horaFinAtencion = nuevaHoraFinAtencion;
   }
 }
 
@@ -76,18 +119,26 @@ const estados = [
 function App() {
   // PARAMETRIZABLES {}{}{{}{}{}}{{}{}}{}{}{}{{}{}{}}{{}}{{}{}}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{{}}{}{{}}{{}}{}{{}}{}{}{{}{}}{{}{}}{}{}{{}}
   const [valoresFormulario, setValoresFormulario] = useState({
-    lineasASimular: 100,
+    lineasASimular: 2,
     lineaAVisualizar: 1,
-    tasaSurtidor: 20,
-    tasaLavadero: 10,
-    tasaMantenimiento: 5,
-    tasaCajero: 15,
-    tasaNuevoServicio: 30,
+    tasaAtencionSurtidor: 20,
+    tasaAtencionLavadero: 10,
+    tasaAtencionMantenimiento: 5,
+    tasaAtencionCajero: 15,
+    tasaAtencionKiosco: 30,
     tasaLlegadaCombustible: 30,
     tasaLlegadaLavadero: 15,
     tasaLlegadaMantenimiento: 10,
     tasaLlegadaCajero: 40
   });
+
+  const [tiempoDeAtencion, setTiempoDeAtencion] = useState({
+    combustible: 1 / valoresFormulario.tasaAtencionSurtidor,
+    lavadero: 1 / valoresFormulario.tasaAtencionLavadero,
+    mantenimiento: 1 / valoresFormulario.tasaAtencionMantenimiento,
+    caja: 1 / valoresFormulario.tasaAtencionCajero,
+    kiosco: 1 / valoresFormulario.tasaAtencionKiosco
+  })
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -100,6 +151,15 @@ function App() {
   const [mostrarTablas, setMostrarTablas] = useState(false);
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    setTiempoDeAtencion({
+      combustible: 1 / valoresFormulario.tasaAtencionSurtidor,
+      lavadero: 1 / valoresFormulario.tasaAtencionLavadero,
+      mantenimiento: 1 / valoresFormulario.tasaAtencionMantenimiento,
+      caja: 1 / valoresFormulario.tasaAtencionCajero,
+      kiosco: 1 / valoresFormulario.tasaAtencionKiosco
+    })
+
     generarTabla();
     setMostrarTablas(true);
   };
@@ -244,8 +304,148 @@ function App() {
 
   // SIMULACIÓN {}{}{{}{}{}}{{}{}}{}{}{}{{}{}{}}{{}}{{}{}}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{{}}{}{{}}{{}}{}{{}}{}{}{{}{}}{{}{}}{}{}{{}}
   const [tablaDeSimulacion, setTablaDeSimulacion] = useState([])
+
+
+  // const calcularProximaLlegadaAServicio = (tasaLlegadaServicio) => {
+  //   const llegadaClienteServicioRND = parseFloat(Math.random())
+  //   const llegadaClienteServicioTiempoEntreLlegadas = -1/valoresFormulario[tasaLlegadaServicio] * Math.log(1-llegadaClienteServicioRND)
+    
+  //   // setllegadaClienteCombustible({
+  //   //   RND: llegadaClienteCombustibleRND,
+  //   //   tiempoEntreLLegadas: llegadaClienteCombustibleTiempoEntreLlegadas,
+  //   //   proximaLlegada: reloj + llegadaClienteCombustibleTiempoEntreLlegadas
+  //   // })
+  //   return [llegadaClienteServicioRND, llegadaClienteServicioTiempoEntreLlegadas]
+  // }
+
+  const encontrarProxHoraImportante = (obj) => {
+    let proxNombre = null;
+    let proxReloj = Infinity;
+  
+    for (const [nombre, valor] of Object.entries(obj)) {
+      if (valor && valor < proxReloj) {
+        proxReloj = valor;
+        proxNombre = nombre;
+      }
+    }
+  
+    return { proxNombre, proxReloj };
+  };
+
+  const agregarClienteAServicio = (listaServicio, nombreClase, clase, setLista, horaFinAtencion, horaActual, finAtencionString) => {
+    let servicioLibreIndex = -1;
+
+    // Buscar el primer equipo del servicio libre
+    for (let i = 0; i < listaServicio.length; i++) {
+      if (listaServicio[i].estado === 'Libre') {
+        servicioLibreIndex = i;
+        break;
+      }
+    }
+    
+    const nuevoCliente = new Cliente();
+
+    if (servicioLibreIndex !== -1) { // Si hay un equipo del Servicio libre
+      listaServicio[servicioLibreIndex].cambiarEstado('Ocupado');
+      nuevoCliente.cambiarEstado(`SA${nombreClase}-${servicioLibreIndex + 1}`);
+      nuevoCliente.cambiarHoraFinAtencion(horaFinAtencion.toFixed(4));
+    } else { // Si todos los equipos del Servicio están ocupados
+      nuevoCliente.cambiarEstado(`EA${nombreClase}`);
+    }
+
+    nuevoCliente.cambiarPosicionLlegada(clase.colaComun.length);
+    nuevoCliente.cambiarHoraLlegada(horaActual);
+
+    clase.colaComun.push(nuevoCliente);
+    setClientes([...clientes, nuevoCliente]);
+    setLista([...listaServicio]); // Trigger re-render
+
+    return servicioLibreIndex
+  };
+
+
+  const finAtencionServicio = (clase, nombreServicio, indiceServicio, reloj, servicios, tasaAtencionServicio) => {
+    let horaFin 
+    
+    console.log(nombreServicio)
+    console.log(indiceServicio)
+    console.log(servicios)
+    console.log(clase.colaComun)
+
+    // Encuentra el índice del cliente en la cola del servicio
+    const indiceClienteEliminadoServicio = clase.colaComun.findIndex(cliente => cliente.horaFinAtencion === reloj);
+    console.log(indiceClienteEliminadoServicio);
+    if(indiceClienteEliminadoServicio < 0) {
+      return horaFin
+    }
+
+    // Elimina el cliente de la cola del servicio
+    const clienteEliminado = clase.colaComun.splice(indiceClienteEliminadoServicio, 1)[0];
+    console.log(clienteEliminado)
+
+    // const indiceClienteEliminadoClientes = clientes.findIndex(cliente => cliente.horaFinAtencion === reloj);
+    // console.log(indiceClienteEliminadoClientes)
+    clienteEliminado.cambiarEstado('')
+    clienteEliminado.cambiarHoraLlegada('')
+    clienteEliminado.cambiarPosicionLlegada('')
+    clienteEliminado.cambiarHoraFinAtencion('')
+    // // Destruye el cliente (puede ser simplemente eliminando su referencia)
+    // clienteEliminado = null;
+
+    servicios[indiceServicio-1].cambiarEstado('Libre')
+  
+    // // Actualiza horasImportantes
+    // horasImportantes[`finAtencion${nombreServicio}${indiceServicio - 1}`] = null;
+    
+    // // Verifica si hay más clientes en la cola común que servicios disponibles
+    if (clase.colaComun.length > servicios.length) {
+      // Encuentra el índice del servicio libre
+      const servicioLibreIndex = servicios.findIndex(servicio => servicio.estado === 'Libre');
+  
+      if (servicioLibreIndex !== -1) {
+        // Mueve al siguiente cliente de la cola al servicio libre
+        const siguienteCliente = clase.colaComun.find(cliente => !cliente.horaFinAtencion)
+        servicios[servicioLibreIndex].cambiarEstado('Ocupado');
+        siguienteCliente.cambiarEstado(`SA${nombreServicio}-${indiceServicio-1}`)
+        horaFin = reloj + (1/tasaAtencionServicio)
+        siguienteCliente.cambiarHoraFinAtencion(horaFin) // Actualiza con el tiempo correspondiente
+  
+        // Asigna el fin de atención al servicio correspondiente
+        // horasImportantes[`finAtencion${nombreServicio}${servicioLibreIndex + 1}`] = tiempoFinAtencion;
+      }
+    }
+  
+    return horaFin;
+  };
+  
+  
   const generarTabla = () => {
     const tabla = [];
+
+    let evento = 'Inicialización'
+    let reloj = 0
+
+    const horasImportantes = {
+      llegadaClienteCombustible: 0,
+      llegadaClienteLavadero: 0,
+      llegadaClienteMantenimiento: 0,
+      llegadaClienteCaja: 0,
+  
+      llegadaClienteKiosco: null,
+      // proxLlegadaKisoco: 0,
+  
+      finAtencionKiosco1: null,
+      finAtencionCombustible1: null,
+      finAtencionCombustible2: null,
+      finAtencionCombustible3: null,
+      finAtencionCombustible4: null,
+      finAtencionLavadero1: null,
+      finAtencionLavadero2: null,
+      finAtencionMantenimiento1: null,
+      finAtencionMantenimiento2: null,
+      finAtencionCaja1: null,
+      finAtencionCaja2: null
+    }
     
     for(var i = 0; i < valoresFormulario.lineasASimular; i++){
       let llegadaClienteCombustibleRND
@@ -260,51 +460,60 @@ function App() {
       let llegadaClienteCajaRND
       let llegadaClienteCajaTiempoEntreLlegadas
 
+      let rndVaKiosco
+
       if(i == 0){
-        setEvento('Inicialización')
-        setReloj(0)
-  
+        // setEvento('Inicialización')
+        // setReloj(0)
+        evento = 'Inicialización'
+        reloj = 0
+
         // COMBUSTIBLE
         // llegada_cliente_combustible
         llegadaClienteCombustibleRND = parseFloat(Math.random())
         llegadaClienteCombustibleTiempoEntreLlegadas = -1/valoresFormulario.tasaLlegadaCombustible * Math.log(1-llegadaClienteCombustibleRND)
-        setllegadaClienteCombustible({
-          RND: llegadaClienteCombustibleRND,
-          tiempoEntreLLegadas: llegadaClienteCombustibleTiempoEntreLlegadas,
-          proximaLlegada: reloj + llegadaClienteCombustibleTiempoEntreLlegadas
-        })
+        horasImportantes.llegadaClienteCombustible = reloj + llegadaClienteCombustibleTiempoEntreLlegadas
+        // setllegadaClienteCombustible({
+        //   RND: llegadaClienteCombustibleRND,
+        //   tiempoEntreLLegadas: llegadaClienteCombustibleTiempoEntreLlegadas,
+        //   proximaLlegada: reloj + llegadaClienteCombustibleTiempoEntreLlegadas
+        // })
 
         // LAVADERO
         // llegada_cliente_lavado
         llegadaClienteLavaderoRND = parseFloat(Math.random())
         llegadaClienteLavaderoTiempoEntreLlegadas = -1/valoresFormulario.tasaLlegadaLavadero * Math.log(1-llegadaClienteLavaderoRND)
-        setllegadaClienteLavadero({
-          RND: llegadaClienteLavaderoRND,
-          tiempoEntreLLegadas: llegadaClienteLavaderoTiempoEntreLlegadas,
-          proximaLlegada: reloj + llegadaClienteLavaderoTiempoEntreLlegadas
-        })
+        horasImportantes.llegadaClienteLavadero = reloj + llegadaClienteLavaderoTiempoEntreLlegadas
+        // setllegadaClienteLavadero({
+        //   RND: llegadaClienteLavaderoRND,
+        //   tiempoEntreLLegadas: llegadaClienteLavaderoTiempoEntreLlegadas,
+        //   proximaLlegada: reloj + llegadaClienteLavaderoTiempoEntreLlegadas
+        // })
 
         // MANTENIMIENTO
         // llegada_cliente_mantenimiento
         llegadaClienteMantenimientoRND = parseFloat(Math.random())
         llegadaClienteMantenimientoTiempoEntreLlegadas = -1/valoresFormulario.tasaLlegadaMantenimiento * Math.log(1-llegadaClienteMantenimientoRND)
-        setllegadaClienteMantenimiento({
-          RND: llegadaClienteMantenimientoRND,
-          tiempoEntreLLegadas: llegadaClienteMantenimientoTiempoEntreLlegadas,
-          proximaLlegada: reloj + llegadaClienteMantenimientoTiempoEntreLlegadas
-        })
+        horasImportantes.llegadaClienteMantenimiento = reloj + llegadaClienteMantenimientoTiempoEntreLlegadas
+        // setllegadaClienteMantenimiento({
+        //   RND: llegadaClienteMantenimientoRND,
+        //   tiempoEntreLLegadas: llegadaClienteMantenimientoTiempoEntreLlegadas,
+        //   proximaLlegada: reloj + llegadaClienteMantenimientoTiempoEntreLlegadas
+        // })
 
         // CAJA
         // llegada_cliente_caja
         llegadaClienteCajaRND = parseFloat(Math.random())
         llegadaClienteCajaTiempoEntreLlegadas = -1/valoresFormulario.tasaLlegadaCajero * Math.log(1-llegadaClienteCajaRND)
-        setllegadaClienteCaja({
-          RND: llegadaClienteCajaRND,
-          tiempoEntreLLegadas: llegadaClienteCajaTiempoEntreLlegadas,
-          proximaLlegada: reloj + llegadaClienteCajaTiempoEntreLlegadas
-        })
+        horasImportantes.llegadaClienteCaja = reloj + llegadaClienteCajaTiempoEntreLlegadas
+        // setllegadaClienteCaja({
+        //   RND: llegadaClienteCajaRND,
+        //   tiempoEntreLLegadas: llegadaClienteCajaTiempoEntreLlegadas,
+        //   proximaLlegada: reloj + llegadaClienteCajaTiempoEntreLlegadas
+        // })
 
         
+        const estadosSurtidores = surtidores.map((surtidor) => surtidor.estado);
         tabla.push({
           evento: evento,
           reloj: 0,
@@ -343,10 +552,10 @@ function App() {
           finAtencionCaja1: '',
           finAtencionCaja2: '',
 
-          surtidor1: surtidores[0].estado,
-          surtidor2: surtidores[1].estado,
-          surtidor3: surtidores[2].estado,
-          surtidor4: surtidores[3].estado,
+          surtidor1: estadosSurtidores[0],
+          surtidor2: estadosSurtidores[1],
+          surtidor3: estadosSurtidores[2],
+          surtidor4: estadosSurtidores[3],
           colaCombustible: Surtidor.colaComun.length,
 
           lavadero1: lavaderos[0].estado,
@@ -404,6 +613,263 @@ function App() {
 
           servicioConMasCola: '',
         })
+      } else{
+
+        const proximoEvento = encontrarProxHoraImportante(horasImportantes);
+        evento = proximoEvento.proxNombre
+        reloj = proximoEvento.proxReloj.toFixed(4)
+
+        if (evento == 'llegadaClienteCombustible'){
+
+          llegadaClienteCombustibleRND = parseFloat(Math.random())
+          llegadaClienteCombustibleTiempoEntreLlegadas = parseFloat((-1/valoresFormulario.tasaLlegadaCombustible * Math.log(1-llegadaClienteCombustibleRND)).toFixed(4))
+          horasImportantes.llegadaClienteCombustible = parseFloat(reloj) + llegadaClienteCombustibleTiempoEntreLlegadas
+          
+          rndVaKiosco = Math.random()
+          if(rndVaKiosco >= 0.25){
+
+            const horaFinAtencion = parseFloat(reloj) + (1/valoresFormulario.tasaAtencionSurtidor)
+            const indiceServicioLibre = agregarClienteAServicio(surtidores, 'Surtidor', Surtidor, setSurtidores, horaFinAtencion, reloj, 'finAtencionCombustible', horasImportantes)
+            horasImportantes[`finAtencionCombustible${indiceServicioLibre+1}`] = horaFinAtencion
+
+          } else{
+
+            const horaFinAtencion = parseFloat(reloj) + (1/valoresFormulario.tasaAtencionKiosco)
+            const indiceServicioLibre = agregarClienteAServicio(kioscos, 'Kiosco', Kiosco, setKioscos, horaFinAtencion, reloj)
+            horasImportantes[`finAtencionKiosco${indiceServicioLibre+1}`] = horaFinAtencion
+
+
+          }
+          
+
+        } else if(evento == 'llegadaClienteLavadero'){
+          llegadaClienteLavaderoRND = parseFloat(Math.random())
+          llegadaClienteLavaderoTiempoEntreLlegadas = parseFloat((-1/valoresFormulario.tasaLlegadaLavadero * Math.log(1-llegadaClienteLavaderoRND)).toFixed(4))
+          horasImportantes.llegadaClienteLavadero = parseFloat(reloj) + llegadaClienteLavaderoTiempoEntreLlegadas
+          
+          rndVaKiosco = Math.random()
+          if(rndVaKiosco >= 0.25){
+
+            const horaFinAtencion = parseFloat(reloj) + (1/valoresFormulario.tasaAtencionLavadero)
+            const indiceServicioLibre = agregarClienteAServicio(lavaderos, 'Lavadero', Lavadero, setLavaderos, horaFinAtencion, reloj)
+            horasImportantes[`finAtencionLavadero${indiceServicioLibre+1}`] = horaFinAtencion
+
+            
+          } else{
+
+            const horaFinAtencion = parseFloat(reloj) + (1/valoresFormulario.tasaAtencionKiosco)
+            const indiceServicioLibre = agregarClienteAServicio(kioscos, 'Kiosco', Kiosco, setKioscos, horaFinAtencion, reloj)
+            horasImportantes[`finAtencionKiosco${indiceServicioLibre+1}`] = horaFinAtencion
+
+
+          }
+
+        } else if(evento == 'llegadaClienteMantenimiento'){
+          llegadaClienteMantenimientoRND = parseFloat(Math.random())
+          llegadaClienteMantenimientoTiempoEntreLlegadas = parseFloat((-1/valoresFormulario.tasaLlegadaMantenimiento * Math.log(1-llegadaClienteMantenimientoRND)).toFixed(4))
+          horasImportantes.llegadaClienteMantenimiento = parseFloat(reloj) + llegadaClienteMantenimientoTiempoEntreLlegadas
+          
+          rndVaKiosco = Math.random()
+          if(rndVaKiosco >= 0.25){
+
+            const horaFinAtencion = parseFloat(reloj) + (1/valoresFormulario.tasaAtencionMantenimiento)
+            const indiceServicioLibre = agregarClienteAServicio(mantenimientos, 'Mantenimiento', MantenimientoRapido, setMantenimientos, horaFinAtencion, reloj)
+            horasImportantes[`finAtencionMantenimiento${indiceServicioLibre+1}`] = horaFinAtencion
+
+          
+          } else{
+
+            const horaFinAtencion = parseFloat(reloj) + (1/valoresFormulario.tasaAtencionKiosco)
+            const indiceServicioLibre = agregarClienteAServicio(kioscos, 'Kiosco', Kiosco, setKioscos, horaFinAtencion, reloj)
+            horasImportantes[`finAtencionKiosco${indiceServicioLibre+1}`] = horaFinAtencion
+
+
+          }
+
+        } else if(evento == 'llegadaClienteCaja'){
+          llegadaClienteCajaRND = parseFloat(Math.random())
+          llegadaClienteCajaTiempoEntreLlegadas = parseFloat((-1/valoresFormulario.tasaLlegadaCajero * Math.log(1-llegadaClienteCajaRND)).toFixed(4))
+          horasImportantes.llegadaClienteCaja = parseFloat(reloj) + llegadaClienteCajaTiempoEntreLlegadas
+          
+          rndVaKiosco = Math.random()
+          if(rndVaKiosco >= 0.25){
+
+            const horaFinAtencion = parseFloat(reloj) + (1/valoresFormulario.tasaAtencionCajero)
+            const indiceServicioLibre = agregarClienteAServicio(cajeros, 'Cajero', Cajero, setCajeros, horaFinAtencion, reloj)
+            horasImportantes[`finAtencionCaja${indiceServicioLibre+1}`] = horaFinAtencion
+
+            
+          } else{
+
+            const horaFinAtencion = parseFloat(reloj) + (1/valoresFormulario.tasaAtencionKiosco)
+            const indiceServicioLibre = agregarClienteAServicio(kioscos, 'Kiosco', Kiosco, setKioscos, horaFinAtencion, reloj)
+            horasImportantes[`finAtencionKiosco${indiceServicioLibre+1}`] = horaFinAtencion
+
+
+          }
+        } else if(evento.substring(0,evento.length-1) == 'finAtencionKiosco'){
+          // console.log(reloj)
+          const horaFin = finAtencionServicio(Kiosco, 'Kiosco', evento.substring(evento.length-1,evento.length), reloj, kioscos, valoresFormulario.tasaAtencionKiosco)
+          if(horaFin){
+            horasImportantes[`finAtencionKiosco${evento.substring(evento.length-1,evento.length)}`] = horaFin
+          }else{
+            horasImportantes[`finAtencionKiosco${evento.substring(evento.length-1,evento.length)}`] = null
+          }
+        } else if(evento.substring(0,evento.length-1) == 'finAtencionCombustible'){
+          // console.log(reloj)
+          const horaFin = finAtencionServicio(Surtidor, 'Surtidor', evento.substring(evento.length-1,evento.length), reloj, surtidores, valoresFormulario.tasaAtencionSurtidor)
+          if(horaFin){
+            horasImportantes[`finAtencionCombustible${evento.substring(evento.length-1,evento.length)}`] = horaFin
+          }else{
+            horasImportantes[`finAtencionCombustible${evento.substring(evento.length-1,evento.length)}`] = null
+          }
+        } else if(evento.substring(0,evento.length-1) == 'finAtencionLavadero'){
+          // console.log(reloj)
+          const horaFin = finAtencionServicio(Lavadero, 'Lavadero', evento.substring(evento.length-1,evento.length), reloj, lavaderos, valoresFormulario.tasaAtencionLavadero)
+          if(horaFin){
+            horasImportantes[`finAtencionLavadero${evento.substring(evento.length-1,evento.length)}`] = horaFin
+          }else{
+            horasImportantes[`finAtencionLavadero${evento.substring(evento.length-1,evento.length)}`] = null
+          }
+        } else if(evento.substring(0,evento.length-1) == 'finAtencionMantenimiento'){
+          // console.log(reloj)
+          const horaFin = finAtencionServicio(MantenimientoRapido, 'Mantenimiento', evento.substring(evento.length-1,evento.length), reloj, mantenimientos, valoresFormulario.tasaAtencionMantenimiento)
+          if(horaFin){
+            horasImportantes[`finAtencionMantenimiento${evento.substring(evento.length-1,evento.length)}`] = horaFin
+          }else{
+            horasImportantes[`finAtencionMantenimiento${evento.substring(evento.length-1,evento.length)}`] = null
+          }
+        } else if(evento.substring(0,evento.length-1) == 'finAtencionCaja'){
+          // console.log(reloj)
+          const horaFin = finAtencionServicio(Cajero, 'Caja', evento.substring(evento.length-1,evento.length), reloj, cajeros, valoresFormulario.tasaAtencionCajero)
+          if(horaFin){
+            horasImportantes[`finAtencionCaja${evento.substring(evento.length-1,evento.length)}`] = horaFin
+          }else{
+            horasImportantes[`finAtencionCaja${evento.substring(evento.length-1,evento.length)}`] = null
+          }
+        }
+
+        // const a = 'finAtencionKiosco1'
+        // console.log(a.substring(0,a.length-1)) 
+        // console.log(a.substring(a.length-1,a.length))
+
+        const estadosSurtidores = surtidores.map((surtidor) => surtidor.estado);
+        const horaFinSurtidores = Surtidor.colaComun.map((cliente) => cliente.horaFinAtencion);
+
+        const estadosLavaderos = lavaderos.map((lavadero) => lavadero.estado);
+        const horaFinLavaderos = Lavadero.colaComun.map((cliente) => cliente.horaFinAtencion);
+
+        const estadosMantenimiento = mantenimientos.map((mantenimiento) => mantenimiento.estado);
+        const horaFinMantenimiento = MantenimientoRapido.colaComun.map((cliente) => cliente.horaFinAtencion);
+
+        const estadosCaja = cajeros.map((caja) => caja.estado);
+        const horaFinCaja = Cajero.colaComun.map((cliente) => cliente.horaFinAtencion);
+
+        const estadosKiosco = kioscos.map((kisoco) => kisoco.estado);
+        const horaFinKiosco = Kiosco.colaComun.map((cliente) => cliente.horaFinAtencion);
+        
+        tabla.push({
+          evento: evento,
+          reloj: reloj,
+  
+          rndLlegadaCombustible: evento=='llegadaClienteCombustible' ? parseFloat(llegadaClienteCombustibleRND.toFixed(4)) : '',
+          tiempoEntreLlegadasCombustible: evento=='llegadaClienteCombustible' ? parseFloat(llegadaClienteCombustibleTiempoEntreLlegadas.toFixed(4)) : '',
+          proximaLlegadaCombustible: parseFloat(horasImportantes.llegadaClienteCombustible.toFixed(4)),
+
+          rndLlegadaLavadero: evento=='llegadaClienteLavadero' ? parseFloat(llegadaClienteLavaderoRND.toFixed(4)): '',
+          tiempoEntreLlegadasLavadero: evento=='llegadaClienteLavadero' ? parseFloat(llegadaClienteLavaderoTiempoEntreLlegadas.toFixed(4)) : '',
+          proximaLlegadaLavadero: parseFloat(horasImportantes.llegadaClienteLavadero.toFixed(4)),
+
+          rndLlegadaMantenimiento: evento=='llegadaClienteMantenimiento' ? parseFloat(llegadaClienteMantenimientoRND.toFixed(4)): '',
+          tiempoEntreLlegadasMantenimiento: evento=='llegadaClienteMantenimiento' ? parseFloat(llegadaClienteMantenimientoTiempoEntreLlegadas.toFixed(4)) : '',
+          proximaLlegadaMantenimiento: parseFloat(horasImportantes.llegadaClienteMantenimiento.toFixed(4)),
+
+          rndLlegadaCaja: evento=='llegadaClienteCaja' ? parseFloat(llegadaClienteCajaRND.toFixed(4)): '',
+          tiempoEntreLlegadasCaja: evento=='llegadaClienteCaja' ? parseFloat(llegadaClienteCajaTiempoEntreLlegadas.toFixed(4)) : '',
+          proximaLlegadaCaja: parseFloat(horasImportantes.llegadaClienteCaja.toFixed(4)),
+  
+          rndVaKiosco: evento.substring(0,7)=='llegada' 
+                        ? rndVaKiosco ? parseFloat(rndVaKiosco).toFixed(4) : ''
+                        : '',
+          vaKiosco: evento.substring(0,7)=='llegada'  
+                        ? rndVaKiosco >= 0.25 ? 'No' : 'Sí'
+                        : '',
+          finAtencionKiosco: horaFinKiosco[0],
+
+          finAtencionCombustible1: horaFinSurtidores[0],
+          finAtencionCombustible2: horaFinSurtidores[1],
+          finAtencionCombustible3: horaFinSurtidores[2],
+          finAtencionCombustible4: horaFinSurtidores[3],
+
+          finAtencionLavadero1: horaFinLavaderos[0],
+          finAtencionLavadero2: horaFinLavaderos[1],
+
+          finAtencionMantenimiento1: horaFinMantenimiento[0],
+          finAtencionMantenimiento2: horaFinMantenimiento[1],
+
+          finAtencionCaja1: horaFinCaja[0],
+          finAtencionCaja2: horaFinCaja[1],
+
+          surtidor1: estadosSurtidores[0],
+          surtidor2: estadosSurtidores[1],
+          surtidor3: estadosSurtidores[2],
+          surtidor4: estadosSurtidores[3],
+          colaCombustible: Surtidor.colaComun.length < 4 ? 0 : Surtidor.colaComun.length - 4,
+
+          lavadero1: estadosLavaderos[0],
+          lavadero2: estadosLavaderos[1],
+          colaLavadero: Lavadero.colaComun.length < 2 ? 0 : Lavadero.colaComun.length - 2,
+
+          mantenimiento1: estadosMantenimiento[0],
+          mantenimiento2: estadosMantenimiento[1],
+          colaMantenimiento: MantenimientoRapido.colaComun.length < 2 ? 0 : MantenimientoRapido.colaComun.length - 2,
+
+          caja1: estadosCaja[0],
+          caja2: estadosCaja[1],
+          colaCaja: Cajero.colaComun.length < 2 ? 0 : Cajero.colaComun.length - 2,
+
+          kiosco1: estadosKiosco[0],
+          colaKiosco: Kiosco.colaComun.length < 1 ? 0 : Kiosco.colaComun.length - 1,
+
+          // servicioMasRapido: '',
+          
+          // acTiempoEsperaCombustible: 0,
+          // acTiempoEsperaLavadero: 0,
+          // acTiempoEsperaMantenimiento: 0,
+          // acTiempoEsperaCaja: 0,
+          // acTiempoEsperaKiosco: 0,
+
+          // acClientesIngresanCombustible: 0,
+          // acClientesIngresanLavadero: 0,
+          // acClientesIngresanMantenimiento: 0,
+          // acClientesIngresanCaja: 0,
+          // acClientesIngresanKiosco: 0,
+
+          // tiempoPromedioPermanenciaColaCombustible: 0,
+          // tiempoPromedioPermanenciaColaLavadero: 0,
+          // tiempoPromedioPermanenciaColaMantenimiento: 0,
+          // tiempoPromedioPermanenciaColaCaja: 0,
+          // tiempoPromedioPermanenciaColaKiosco: 0,
+
+          // acTiempoOcupacionCombustible: 0,
+          // porcentajeOcupacionCombustible: 0,
+          // acTiempoOcupacionLavadero: 0,
+          // porcentajeOcupacionLavadero: 0,
+          // acTiempoOcupacionMantenimiento: 0,
+          // porcentajeOcupacionMantenimiento: 0,
+          // acTiempoOcupacionCaja: 0,
+          // porcentajeOcupacionCaja: 0,
+          // acTiempoOcupacionKiosco: 0,
+          // porcentajeOcupacionKiosco: 0,
+
+          // acClientesAtendidosCombustible: 0,
+          // acClientesAtendidosLavadero: 0,
+          // acClientesAtendidosMantenimiento: 0,
+          // acClientesAtendidosCaja: 0,
+          // acClientesAtendidosKiosco: 0,
+
+          // servicioConMasCola: '',
+        })
       }
 
     }
@@ -411,6 +877,30 @@ function App() {
     setTablaDeSimulacion(tabla)
   }
 
+
+  const encontrarMenorValor = (fila) => {
+    const valores = [
+      parseFloat(fila.proximaLlegadaCombustible),
+      parseFloat(fila.proximaLlegadaLavadero),
+      parseFloat(fila.proximaLlegadaMantenimiento),
+      parseFloat(fila.proximaLlegadaCaja),
+      parseFloat(fila.finAtencionCombustible1),
+      parseFloat(fila.finAtencionCombustible2),
+      parseFloat(fila.finAtencionCombustible3),
+      parseFloat(fila.finAtencionCombustible4),
+      parseFloat(fila.finAtencionLavadero1),
+      parseFloat(fila.finAtencionLavadero2),
+      parseFloat(fila.finAtencionMantenimiento1),
+      parseFloat(fila.finAtencionMantenimiento2),
+      parseFloat(fila.finAtencionCaja1),
+      parseFloat(fila.finAtencionCaja2)
+    ];
+    
+    const valoresFiltrados = valores.filter(valor => !isNaN(valor));
+    
+    const menorValor = Math.min(...valoresFiltrados);
+    return menorValor;
+  };
 
   return (
     <>
@@ -428,27 +918,27 @@ function App() {
         <br />
         <label>
           Tasa de vehículos a atender por hora por surtidor:
-          <input type="number" name="tasaSurtidor" value={valoresFormulario.tasaSurtidor} onChange={handleChange} />
+          <input type="number" name="tasaAtencionSurtidor" value={valoresFormulario.tasaAtencionSurtidor} onChange={handleChange} />
         </label>
         <br />
         <label>
           Tasa de vehículos a atender por hora por lavadero:
-          <input type="number" name="tasaLavadero" value={valoresFormulario.tasaLavadero} onChange={handleChange} />
+          <input type="number" name="tasaAtencionLavadero" value={valoresFormulario.tasaAtencionLavadero} onChange={handleChange} />
         </label>
         <br />
         <label>
           Tasa de vehículos a atender por hora por mantenimiento:
-          <input type="number" name="tasaMantenimiento" value={valoresFormulario.tasaMantenimiento} onChange={handleChange} />
+          <input type="number" name="tasaAtencionMantenimiento" value={valoresFormulario.tasaAtencionMantenimiento} onChange={handleChange} />
         </label>
         <br />
         <label>
           Tasa de personas a atender por hora por cajero:
-          <input type="number" name="tasaCajero" value={valoresFormulario.tasaCajero} onChange={handleChange} />
+          <input type="number" name="tasaAtencionCajero" value={valoresFormulario.tasaAtencionCajero} onChange={handleChange} />
         </label>
         <br />
         <label>
           Tasa de personas a atender por hora por nuevo servicio:
-          <input type="number" name="tasaNuevoServicio" value={valoresFormulario.tasaNuevoServicio} onChange={handleChange} />
+          <input type="number" name="tasaAtencionKiosco" value={valoresFormulario.tasaAtencionKiosco} onChange={handleChange} />
         </label>
         <br />
         <label>
@@ -646,119 +1136,124 @@ function App() {
               </tr>
             </thead>
             <tbody>
-              {tablaDeSimulacion.map((fila, index) => (
-                <tr key={index}>
-                  <td>{fila.evento}</td>
-                  <td>{fila.reloj}</td>
+              {tablaDeSimulacion.map((fila, index) => {
+                
+                const menorValor = encontrarMenorValor(fila);
+               
+                return(
+                  <tr key={index}>
+                    <td>{fila.evento}</td>
+                    <td>{fila.reloj}</td>
 
-                  <td>{fila.rndLlegadaCombustible}</td>
-                  <td>{fila.tiempoEntreLlegadasCombustible}</td>
-                  <td>{fila.proximaLlegadaCombustible}</td>
+                    <td>{fila.rndLlegadaCombustible}</td>
+                    <td>{fila.tiempoEntreLlegadasCombustible}</td>
+                    <td className={fila.proximaLlegadaCombustible === menorValor ? 'menorValor' : ''}>{fila.proximaLlegadaCombustible}</td>
 
-                  <td>{fila.rndLlegadaLavadero}</td>
-                  <td>{fila.tiempoEntreLlegadasLavadero}</td>
-                  <td>{fila.proximaLlegadaLavadero}</td>
+                    <td>{fila.rndLlegadaLavadero}</td>
+                    <td>{fila.tiempoEntreLlegadasLavadero}</td>
+                    <td className={fila.proximaLlegadaLavadero === menorValor ? 'menorValor' : ''}>{fila.proximaLlegadaLavadero}</td>
 
-                  <td>{fila.rndLlegadaMantenimiento}</td>
-                  <td>{fila.tiempoEntreLlegadasMantenimiento}</td>
-                  <td>{fila.proximaLlegadaMantenimiento}</td>
+                    <td>{fila.rndLlegadaMantenimiento}</td>
+                    <td>{fila.tiempoEntreLlegadasMantenimiento}</td>
+                    <td className={fila.proximaLlegadaMantenimiento === menorValor ? 'menorValor' : ''}>{fila.proximaLlegadaMantenimiento}</td>
 
-                  <td>{fila.rndLlegadaCaja}</td>
-                  <td>{fila.tiempoEntreLlegadasCaja}</td>
-                  <td>{fila.proximaLlegadaCaja}</td>
+                    <td>{fila.rndLlegadaCaja}</td>
+                    <td>{fila.tiempoEntreLlegadasCaja}</td>
+                    <td className={fila.proximaLlegadaCaja === menorValor ? 'menorValor' : ''}>{fila.proximaLlegadaCaja}</td>
 
-                  <td>{fila.rndVaKiosco}</td>
-                  <td>{fila.vaKiosco}</td>
-                  <td>{fila.finAtencionKiosco}</td>
+                    <td>{fila.rndVaKiosco}</td>
+                    <td>{fila.vaKiosco}</td>
+                    <td className={fila.finAtencionKiosco === menorValor ? 'menorValor' : ''}>{fila.finAtencionKiosco}</td>
 
-                  <td>{fila.finAtencionCombustible1}</td>
-                  <td>{fila.finAtencionCombustible2}</td>
-                  <td>{fila.finAtencionCombustible3}</td>
-                  <td>{fila.finAtencionCombustible4}</td>
+                    <td className={fila.finAtencionCombustible1 === menorValor ? 'menorValor' : ''}>{fila.finAtencionCombustible1}</td>
+                    <td className={fila.finAtencionCombustible2 === menorValor ? 'menorValor' : ''}>{fila.finAtencionCombustible2}</td>
+                    <td className={fila.finAtencionCombustible3 === menorValor ? 'menorValor' : ''}>{fila.finAtencionCombustible3}</td>
+                    <td className={fila.finAtencionCombustible4 === menorValor ? 'menorValor' : ''}>{fila.finAtencionCombustible4}</td>
 
-                  <td>{fila.finAtencionLavadero1}</td>
-                  <td>{fila.finAtencionLavadero2}</td>
+                    <td className={fila.finAtencionLavadero1 === menorValor ? 'menorValor' : ''}>{fila.finAtencionLavadero1}</td>
+                    <td className={fila.finAtencionLavadero2 === menorValor ? 'menorValor' : ''}>{fila.finAtencionLavadero2}</td>
 
-                  <td>{fila.finAtencionMantenimiento1}</td>
-                  <td>{fila.finAtencionMantenimiento2}</td>
+                    <td className={fila.finAtencionMantenimiento1 === menorValor ? 'menorValor' : ''}>{fila.finAtencionMantenimiento1}</td>
+                    <td className={fila.finAtencionMantenimiento2 === menorValor ? 'menorValor' : ''}>{fila.finAtencionMantenimiento2}</td>
 
-                  <td>{fila.finAtencionCaja1}</td>
-                  <td>{fila.finAtencionCaja2}</td>
+                    <td className={fila.finAtencionCaja1 === menorValor ? 'menorValor' : ''}>{fila.finAtencionCaja1}</td>
+                    <td className={fila.finAtencionCaja2 === menorValor ? 'menorValor' : ''}>{fila.finAtencionCaja2}</td>
 
-                  <td>{fila.surtidor1}</td>
-                  <td>{fila.surtidor2}</td>
-                  <td>{fila.surtidor3}</td>
-                  <td>{fila.surtidor4}</td>
-                  <td>{fila.colaCombustible}</td>
+                    <td>{fila.surtidor1}</td>
+                    <td>{fila.surtidor2}</td>
+                    <td>{fila.surtidor3}</td>
+                    <td>{fila.surtidor4}</td>
+                    <td>{fila.colaCombustible}</td>
 
-                  <td>{fila.lavadero1}</td>
-                  <td>{fila.lavadero2}</td>
-                  <td>{fila.colaLavadero}</td>
+                    <td>{fila.lavadero1}</td>
+                    <td>{fila.lavadero2}</td>
+                    <td>{fila.colaLavadero}</td>
 
-                  <td>{fila.mantenimiento1}</td>
-                  <td>{fila.mantenimiento2}</td>
-                  <td>{fila.colaMantenimiento}</td>
+                    <td>{fila.mantenimiento1}</td>
+                    <td>{fila.mantenimiento2}</td>
+                    <td>{fila.colaMantenimiento}</td>
 
-                  <td>{fila.caja1}</td>
-                  <td>{fila.caja2}</td>
-                  <td>{fila.colaCaja}</td>
+                    <td>{fila.caja1}</td>
+                    <td>{fila.caja2}</td>
+                    <td>{fila.colaCaja}</td>
 
-                  <td>{fila.kiosco1}</td>
-                  <td>{fila.colaKiosco}</td>
+                    <td>{fila.kiosco1}</td>
+                    <td>{fila.colaKiosco}</td>
 
 
-                  <td>{fila.servicioMasRapido}</td>
+                    <td>{fila.servicioMasRapido}</td>
 
-                  <td>{fila.acTiempoEsperaCombustible}</td>
-                  <td>{fila.acTiempoEsperaLavadero}</td>
-                  <td>{fila.acTiempoEsperaMantenimiento}</td>
-                  <td>{fila.acTiempoEsperaCaja}</td>
-                  <td>{fila.acTiempoEsperaKiosco}</td>
+                    <td>{fila.acTiempoEsperaCombustible}</td>
+                    <td>{fila.acTiempoEsperaLavadero}</td>
+                    <td>{fila.acTiempoEsperaMantenimiento}</td>
+                    <td>{fila.acTiempoEsperaCaja}</td>
+                    <td>{fila.acTiempoEsperaKiosco}</td>
 
-                  <td>{fila.acClientesIngresanCombustible}</td>
-                  <td>{fila.acClientesIngresanLavadero}</td>
-                  <td>{fila.acClientesIngresanMantenimiento}</td>
-                  <td>{fila.acClientesIngresanCaja}</td>
-                  <td>{fila.acClientesIngresanKiosco}</td>
+                    <td>{fila.acClientesIngresanCombustible}</td>
+                    <td>{fila.acClientesIngresanLavadero}</td>
+                    <td>{fila.acClientesIngresanMantenimiento}</td>
+                    <td>{fila.acClientesIngresanCaja}</td>
+                    <td>{fila.acClientesIngresanKiosco}</td>
 
-                  <td>{fila.tiempoPromedioPermanenciaColaCombustible}</td>
-                  <td>{fila.tiempoPromedioPermanenciaColaLavadero}</td>
-                  <td>{fila.tiempoPromedioPermanenciaColaMantenimiento}</td>
-                  <td>{fila.tiempoPromedioPermanenciaColaCaja}</td>
-                  <td>{fila.tiempoPromedioPermanenciaColaKiosco}</td>
+                    <td>{fila.tiempoPromedioPermanenciaColaCombustible}</td>
+                    <td>{fila.tiempoPromedioPermanenciaColaLavadero}</td>
+                    <td>{fila.tiempoPromedioPermanenciaColaMantenimiento}</td>
+                    <td>{fila.tiempoPromedioPermanenciaColaCaja}</td>
+                    <td>{fila.tiempoPromedioPermanenciaColaKiosco}</td>
 
-                  <td>{fila.acTiempoOcupacionCombustible}</td>
-                  <td>{fila.porcentajeOcupacionCombustible}</td>
-                  <td>{fila.acTiempoOcupacionLavadero}</td>
-                  <td>{fila.porcentajeOcupacionLavadero}</td>
-                  <td>{fila.acTiempoOcupacionMantenimiento}</td>
-                  <td>{fila.porcentajeOcupacionMantenimiento}</td>
-                  <td>{fila.acTiempoOcupacionCaja}</td>
-                  <td>{fila.porcentajeOcupacionCaja}</td>
-                  <td>{fila.acTiempoOcupacionKiosco}</td>
-                  <td>{fila.porcentajeOcupacionKiosco}</td>
+                    <td>{fila.acTiempoOcupacionCombustible}</td>
+                    <td>{fila.porcentajeOcupacionCombustible}</td>
+                    <td>{fila.acTiempoOcupacionLavadero}</td>
+                    <td>{fila.porcentajeOcupacionLavadero}</td>
+                    <td>{fila.acTiempoOcupacionMantenimiento}</td>
+                    <td>{fila.porcentajeOcupacionMantenimiento}</td>
+                    <td>{fila.acTiempoOcupacionCaja}</td>
+                    <td>{fila.porcentajeOcupacionCaja}</td>
+                    <td>{fila.acTiempoOcupacionKiosco}</td>
+                    <td>{fila.porcentajeOcupacionKiosco}</td>
 
-                  <td>{fila.acClientesAtendidosCombustible}</td>
-                  <td>{fila.acClientesAtendidosLavadero}</td>
-                  <td>{fila.acClientesAtendidosMantenimiento}</td>
-                  <td>{fila.acClientesAtendidosCaja}</td>
-                  <td>{fila.acClientesAtendidosKiosco}</td>
+                    <td>{fila.acClientesAtendidosCombustible}</td>
+                    <td>{fila.acClientesAtendidosLavadero}</td>
+                    <td>{fila.acClientesAtendidosMantenimiento}</td>
+                    <td>{fila.acClientesAtendidosCaja}</td>
+                    <td>{fila.acClientesAtendidosKiosco}</td>
 
-                  <td>{fila.servicioConMasCola}</td>
+                    <td>{fila.servicioConMasCola}</td>
 
-                  
+                    
 
-                  {/* <td>{reloj.toFixed(2)}</td>
-                  <td>{llegadaClienteCombustible.RND.toFixed(2)}</td>
-                  <td>{llegadaClienteCombustible.tiempoEntreLLegadas.toFixed(2)}</td>
-                  <td>{llegadaClienteCombustible.proximaLlegada.toFixed(2)}</td>
-                  <td colSpan="4"></td>
-                  {surtidores.map((surtidor, index) => (
-                    <td key={index}>{surtidor.estado}</td>
-                  ))}
-                  <td>{Surtidor.colaComun.length}</td> */}
-                </tr>
-              ))}
+                    {/* <td>{reloj.toFixed(2)}</td>
+                    <td>{llegadaClienteCombustible.RND.toFixed(2)}</td>
+                    <td>{llegadaClienteCombustible.tiempoEntreLLegadas.toFixed(2)}</td>
+                    <td>{llegadaClienteCombustible.proximaLlegada.toFixed(2)}</td>
+                    <td colSpan="4"></td>
+                    {surtidores.map((surtidor, index) => (
+                      <td key={index}>{surtidor.estado}</td>
+                    ))}
+                    <td>{Surtidor.colaComun.length}</td> */}
+                  </tr> 
+                )
+              })}
             </tbody>
           </table>
         </div>
@@ -766,7 +1261,7 @@ function App() {
       
       
       {/* EJEMPLO SURITDOR {}{}{{}{}{}}{{}{}}{}{}{}{{}{}{}}{{}}{{}{}}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{{}}{}{{}}{{}}{}{{}}{}{}{{}{}}{{}{}}{}{}{{}} */}
-        <div>
+        {/* <div>
           <h1>Surtidores</h1>
           {surtidores.map((surtidor, index) => (
             <div key={index}>
@@ -786,10 +1281,10 @@ function App() {
           <button onClick={() => agregarClienteAColaSurtidor('Vehículo ' + (Surtidor.colaComun.length + 1))}>
             Agregar Vehículo a la Cola
           </button>
-        </div>
+        </div> */}
 
       {/* EJEMPLO CLIENTE {}{}{{}{}{}}{{}{}}{}{}{}{{}{}{}}{{}}{{}{}}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{{}}{}{{}}{{}}{}{{}}{}{}{{}{}}{{}{}}{}{}{{}} */}
-        <div>
+        {/* <div>
           <h1>Clientes</h1>
           {clientes.map((cliente, index) => (
             <div key={index}>
@@ -808,7 +1303,7 @@ function App() {
             </div>
           ))}
           <button onClick={agregarCliente}>Agregar Cliente</button>
-        </div>
+        </div> */}
 
     </>
   )

@@ -40,3 +40,14 @@
 .read-the-docs {
   color: #888;
 }
+
+
+
+
+tr:hover{
+  background-color: rgb(92, 1, 92);
+}
+
+.menorValor{
+  background-color: rgb(147, 0, 0);
+}

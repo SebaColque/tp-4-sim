@@ -336,6 +336,13 @@ function App() {
     return { proxNombre, proxReloj };
   };
 
+
+  let cantidadClientesIngresaronCombustible = 0
+  let cantidadClientesIngresaronLavadero = 0
+  let cantidadClientesIngresaronMantenimiento = 0
+  let cantidadClientesIngresaronCaja = 0
+  let cantidadClientesIngresaronKiosco = 0
+
   const agregarClienteAServicio = (listaServicio, nombreClase, clase, setLista, horaFinAtencion, horaActual, finAtencionString) => {
     let servicioLibreIndex = -1;
 
@@ -366,11 +373,35 @@ function App() {
     setClientes([...clientes, nuevoCliente]);
     setLista([...listaServicio]); // Trigger re-render
 
+    if(nombreClase == 'Surtidor'){
+      cantidadClientesIngresaronCombustible += 1
+    } else if(nombreClase == 'Kiosco'){
+      cantidadClientesIngresaronKiosco += 1
+    } else if(nombreClase == 'Lavadero'){
+      cantidadClientesIngresaronLavadero += 1
+    } else if(nombreClase == 'Mantenimiento'){
+      cantidadClientesIngresaronMantenimiento += 1
+    } else if(nombreClase == 'Cajero'){
+      cantidadClientesIngresaronCaja += 1
+    }
+
     // console.log(clase.colaComun)
     // console.log(servicioLibreIndex)
     return servicioLibreIndex
   };
 
+  
+  let tiempoAcEsperaCombustible = 0 
+  let tiempoAcEsperaLavadero = 0 
+  let tiempoAcEsperaMantenimiento = 0 
+  let tiempoAcEsperaCaja = 0 
+  let tiempoAcEsperaKiosco = 0 
+
+  let acClientesAtendidosCombustible = 0
+  let acClientesAtendidosLavadero = 0
+  let acClientesAtendidosMantenimiento = 0
+  let acClientesAtendidosCaja = 0
+  let acClientesAtendidosKiosco = 0
 
   const finAtencionServicio = (clase, nombreServicio, indiceServicio, reloj, servicios, tasaAtencionServicio) => {
     let horaFin 
@@ -393,6 +424,7 @@ function App() {
     }
 
     // Elimina el cliente de la cola del servicio
+    const intercambiar = clase.colaComun.length > servicios.length
     const clienteEliminado = clase.colaComun.splice(indiceClienteEliminadoServicio, 1)[0];
     // console.log(clienteEliminado)
 
@@ -406,19 +438,32 @@ function App() {
     // // Destruye el cliente (puede ser simplemente eliminando su referencia)
     // clienteEliminado = null;
 
-    servicios[indiceServicio-1].cambiarEstado('Libre')
+    if(nombreServicio == 'Kiosco'){
+      acClientesAtendidosKiosco += 1
+    } else if(nombreServicio == 'Surtidor'){
+      acClientesAtendidosCombustible += 1
+    } else if(nombreServicio == 'Lavadero'){
+      acClientesAtendidosLavadero += 1
+    } else if(nombreServicio == 'Mantenimiento'){
+      acClientesAtendidosMantenimiento += 1
+    } else if(nombreServicio == 'Caja'){
+      acClientesAtendidosCaja += 1
+    }
   
     // // Actualiza horasImportantes
     // horasImportantes[`finAtencion${nombreServicio}${indiceServicio - 1}`] = null;
     
     // // Verifica si hay más clientes en la cola común que servicios disponibles
-    console.log(reloj)
-    console.log('Clase cola: ', clase.colaComun)
-    console.log('clase cola largo: ', clase.colaComun.length)
+    // console.log(reloj)
+    // console.log('Clase cola: ', clase.colaComun)
+    // console.log('clase cola largo: ', clase.colaComun.length)
     // console.log(servicios)
-    console.log('servi largo: ' ,servicios.length)
+    // console.log('servi largo: ' ,servicios.length)
 
-    if (clase.colaComun.length > servicios.length) {
+    // console.log(reloj, clase.colaComun.length, servicios.length)
+
+    // if (clase.colaComun.length > servicios.length) {
+    if (intercambiar) {
       // Encuentra el índice del servicio libre
       // const servicioLibreIndex = servicios.findIndex(servicio => servicio.estado === 'Libre');
       // console.log(`reloj: ${reloj}`, `servicioLibreIndex: ${servicioLibreIndex}`)
@@ -436,12 +481,33 @@ function App() {
         // Asigna el fin de atención al servicio correspondiente
         // horasImportantes[`finAtencion${nombreServicio}${servicioLibreIndex + 1}`] = tiempoFinAtencion;
         // }
+
+        if(nombreServicio == 'Kiosco'){
+          tiempoAcEsperaKiosco += reloj - siguienteCliente.horaLlegada
+        } else if(nombreServicio == 'Surtidor'){
+          tiempoAcEsperaCombustible += reloj - siguienteCliente.horaLlegada
+        } else if(nombreServicio == 'Lavadero'){
+          tiempoAcEsperaLavadero += reloj - siguienteCliente.horaLlegada
+        } else if(nombreServicio == 'Mantenimiento'){
+          tiempoAcEsperaMantenimiento += reloj - siguienteCliente.horaLlegada
+        } else if(nombreServicio == 'Caja'){
+          tiempoAcEsperaCaja += reloj - siguienteCliente.horaLlegada
+        }
+
+        } else{
+          servicios[indiceServicio-1].cambiarEstado('Libre')
         }
         
       // console.log("HORA FINN: ", horaFin)
     return horaFin;
   };
   
+
+  let acTiempoOcupacionCombustible = 0
+  let acTiempoOcupacionLavadero = 0
+  let acTiempoOcupacionMantenimiento = 0
+  let acTiempoOcupacionCaja = 0
+  let acTiempoOcupacionKiosco = 0
   
   const generarTabla = () => {
     const tabla = [];
@@ -470,6 +536,13 @@ function App() {
       finAtencionCaja1: null,
       finAtencionCaja2: null
     }
+
+      let estadosSurtidoresAnterior = []
+      let estadosSLavaderoAnterior = []
+      let estadosMantenimientoAnterior = []
+      let estadosCajaAnterior = []
+      let estadosKioscoAnterior = []
+      let relojAnterior = 0
     
     for(var i = 0; i < valoresFormulario.lineasASimular; i++){
       let llegadaClienteCombustibleRND
@@ -485,6 +558,8 @@ function App() {
       let llegadaClienteCajaTiempoEntreLlegadas
 
       let rndVaKiosco
+      
+      
 
       if(i == 0){
         // setEvento('Inicialización')
@@ -860,7 +935,41 @@ function App() {
         // console.log('kisoco')
         // console.log(Kiosco.colaComun.map(c => c))
         // console.log(horaFinKiosco)
+
+        const cantClinesEnColaPorServicio = {
+          'Surtidor': Surtidor.colaComun.length < 4 ? 0 : Surtidor.colaComun.length - 4,
+          'Lavadero': Lavadero.colaComun.length < 2 ? 0 : Lavadero.colaComun.length - 2,
+          'Mantenimiento': MantenimientoRapido.colaComun.length < 2 ? 0 : MantenimientoRapido.colaComun.length - 2,
+          'Caja': Cajero.colaComun.length < 2 ? 0 : Cajero.colaComun.length - 2,
+          'Kiosco': Kiosco.colaComun.length < 1 ? 0 : Kiosco.colaComun.length - 1,
+        }
+        // Encuentra el tamaño mínimo de la cola
+        const minCola = Math.min(...Object.values(cantClinesEnColaPorServicio));
+
+        // Filtra los servicios que tienen una cola con el tamaño mínimo
+        const serviciosConMenorCola = Object.keys(cantClinesEnColaPorServicio)
+          .filter(servicio => cantClinesEnColaPorServicio[servicio] === minCola);
+
+        // Devuelve los nombres de los servicios con la menor cola, separados por "-"
+        const resultadoMenorCola = serviciosConMenorCola.join('-');
         
+        // console.log(Kiosco.colaComun.filter(c => c.horaFinAtencion == null).map(cliente => reloj - cliente.horaLlegada))
+
+        acTiempoOcupacionCombustible += estadosSurtidoresAnterior.some(estado => estado == 'Ocupado') ? reloj -  relojAnterior: 0
+        acTiempoOcupacionLavadero += estadosSLavaderoAnterior.some(estado => estado == 'Ocupado') ? reloj -  relojAnterior: 0
+        acTiempoOcupacionMantenimiento += estadosMantenimientoAnterior.some(estado => estado == 'Ocupado') ? reloj -  relojAnterior: 0
+        acTiempoOcupacionCaja += estadosCajaAnterior.some(estado => estado == 'Ocupado') ? reloj -  relojAnterior: 0
+        acTiempoOcupacionKiosco += estadosKioscoAnterior.some(estado => estado == 'Ocupado') ? reloj -  relojAnterior: 0
+
+
+        const maxCola = Math.max(...Object.values(cantClinesEnColaPorServicio));
+
+        const serviciosConMayorCola = Object.keys(cantClinesEnColaPorServicio)
+          .filter(servicio => cantClinesEnColaPorServicio[servicio] === maxCola);
+        // Devuelve los nombres de los servicios con la menor cola, separados por "-"
+        const resultadoMayorCola = serviciosConMayorCola.join('-');
+
+
         tabla.push({
           evento: evento,
           reloj: parseFloat(reloj).toFixed(4),
@@ -924,46 +1033,53 @@ function App() {
           kiosco1: estadosKiosco[0],
           colaKiosco: Kiosco.colaComun.length < 1 ? 0 : Kiosco.colaComun.length - 1,
 
-          // servicioMasRapido: '',
+          servicioMasRapido: resultadoMenorCola,
           
-          // acTiempoEsperaCombustible: 0,
-          // acTiempoEsperaLavadero: 0,
-          // acTiempoEsperaMantenimiento: 0,
-          // acTiempoEsperaCaja: 0,
-          // acTiempoEsperaKiosco: 0,
+          acTiempoEsperaCombustible: parseFloat(tiempoAcEsperaCombustible).toFixed(4),
+          acTiempoEsperaLavadero: parseFloat(tiempoAcEsperaLavadero).toFixed(4),
+          acTiempoEsperaMantenimiento: parseFloat(tiempoAcEsperaMantenimiento).toFixed(4),
+          acTiempoEsperaCaja: parseFloat(tiempoAcEsperaCaja).toFixed(4),
+          acTiempoEsperaKiosco: parseFloat(tiempoAcEsperaKiosco).toFixed(4),
 
-          // acClientesIngresanCombustible: 0,
-          // acClientesIngresanLavadero: 0,
-          // acClientesIngresanMantenimiento: 0,
-          // acClientesIngresanCaja: 0,
-          // acClientesIngresanKiosco: 0,
+          acClientesIngresanCombustible: cantidadClientesIngresaronCombustible,
+          acClientesIngresanLavadero: cantidadClientesIngresaronLavadero,
+          acClientesIngresanMantenimiento: cantidadClientesIngresaronMantenimiento,
+          acClientesIngresanCaja: cantidadClientesIngresaronCaja,
+          acClientesIngresanKiosco: cantidadClientesIngresaronKiosco,
 
-          // tiempoPromedioPermanenciaColaCombustible: 0,
-          // tiempoPromedioPermanenciaColaLavadero: 0,
-          // tiempoPromedioPermanenciaColaMantenimiento: 0,
-          // tiempoPromedioPermanenciaColaCaja: 0,
-          // tiempoPromedioPermanenciaColaKiosco: 0,
+          tiempoPromedioPermanenciaColaCombustible: cantidadClientesIngresaronCombustible == 0 ? 0 : parseFloat(parseFloat(tiempoAcEsperaCombustible).toFixed(4) / cantidadClientesIngresaronCombustible).toFixed(4),
+          tiempoPromedioPermanenciaColaLavadero: cantidadClientesIngresaronLavadero == 0 ? 0 : parseFloat(parseFloat(tiempoAcEsperaLavadero).toFixed(4) / cantidadClientesIngresaronLavadero).toFixed(4),
+          tiempoPromedioPermanenciaColaMantenimiento: cantidadClientesIngresaronMantenimiento == 0 ? 0 : parseFloat(parseFloat(tiempoAcEsperaMantenimiento).toFixed(4) / cantidadClientesIngresaronMantenimiento).toFixed(4),
+          tiempoPromedioPermanenciaColaCaja: cantidadClientesIngresaronCaja == 0 ? 0 : parseFloat(parseFloat(tiempoAcEsperaCaja).toFixed(4) / cantidadClientesIngresaronCaja).toFixed(4),
+          tiempoPromedioPermanenciaColaKiosco: cantidadClientesIngresaronKiosco == 0 ? 0 : parseFloat(parseFloat(tiempoAcEsperaKiosco).toFixed(4) / cantidadClientesIngresaronKiosco).toFixed(4),
 
-          // acTiempoOcupacionCombustible: 0,
-          // porcentajeOcupacionCombustible: 0,
-          // acTiempoOcupacionLavadero: 0,
-          // porcentajeOcupacionLavadero: 0,
-          // acTiempoOcupacionMantenimiento: 0,
-          // porcentajeOcupacionMantenimiento: 0,
-          // acTiempoOcupacionCaja: 0,
-          // porcentajeOcupacionCaja: 0,
-          // acTiempoOcupacionKiosco: 0,
-          // porcentajeOcupacionKiosco: 0,
+          acTiempoOcupacionCombustible: parseFloat(acTiempoOcupacionCombustible).toFixed(4),
+          porcentajeOcupacionCombustible: `${parseFloat((acTiempoOcupacionCombustible / reloj) * 100).toFixed(4)} %`,
+          acTiempoOcupacionLavadero: parseFloat(acTiempoOcupacionLavadero).toFixed(4),
+          porcentajeOcupacionLavadero: `${parseFloat((acTiempoOcupacionLavadero / reloj) * 100).toFixed(4)} %`,
+          acTiempoOcupacionMantenimiento: parseFloat(acTiempoOcupacionMantenimiento).toFixed(4),
+          porcentajeOcupacionMantenimiento: `${parseFloat((acTiempoOcupacionMantenimiento / reloj) * 100).toFixed(4)} %`,
+          acTiempoOcupacionCaja: parseFloat(acTiempoOcupacionCaja).toFixed(4),
+          porcentajeOcupacionCaja: `${parseFloat((acTiempoOcupacionCaja / reloj) * 100).toFixed(4)} %`,
+          acTiempoOcupacionKiosco: parseFloat(acTiempoOcupacionKiosco).toFixed(4),
+          porcentajeOcupacionKiosco: `${parseFloat((acTiempoOcupacionKiosco / reloj) * 100).toFixed(4)} %`,
 
-          // acClientesAtendidosCombustible: 0,
-          // acClientesAtendidosLavadero: 0,
-          // acClientesAtendidosMantenimiento: 0,
-          // acClientesAtendidosCaja: 0,
-          // acClientesAtendidosKiosco: 0,
+          acClientesAtendidosCombustible: acClientesAtendidosCombustible,
+          acClientesAtendidosLavadero: acClientesAtendidosLavadero,
+          acClientesAtendidosMantenimiento: acClientesAtendidosMantenimiento,
+          acClientesAtendidosCaja: acClientesAtendidosCaja,
+          acClientesAtendidosKiosco: acClientesAtendidosKiosco,
 
-          // servicioConMasCola: '',
+          servicioConMasCola: resultadoMayorCola,
         })
       }
+
+      estadosSurtidoresAnterior = surtidores.map((x) => x.estado);
+      estadosSLavaderoAnterior = lavaderos.map((x) => x.estado);
+      estadosMantenimientoAnterior = mantenimientos.map((x) => x.estado);
+      estadosCajaAnterior = cajeros.map((x) => x.estado);
+      estadosKioscoAnterior = kioscos.map((x) => x.estado);
+      relojAnterior = reloj;
 
     }
 
@@ -1068,7 +1184,7 @@ function App() {
           <table>
             <thead>
               <tr className='se'>
-                <th colSpan="27"></th>
+                <th colSpan="28"></th>
                 <th colSpan="5">SURTIDOR</th>
                 <th colSpan="3">LAVADERO</th>
                 <th colSpan="3">MANTENIMIENTO</th>
@@ -1085,7 +1201,7 @@ function App() {
                 <th colSpan="1"></th>
               </tr>
               <tr>
-                <th colSpan="2"></th>
+                <th colSpan="3"></th>
 
                 <th colSpan="3" className='ll-c-c'>llegada_cliente_combustible</th>
                 <th colSpan="3" className='ll-c-l'>llegada_cliente_lavadero</th>
@@ -1133,6 +1249,7 @@ function App() {
                 <th colSpan="1"></th>
               </tr>
               <tr>
+                <th>Fila</th>
                 <th>Evento</th>
                 <th>Reloj (hs)</th>
 
@@ -1235,10 +1352,14 @@ function App() {
               {tablaDeSimulacion.map((fila, index) => {
                 
                 const menorValor = encontrarMenorValor(fila);
-                // console.log(menorValor)
-               
-                return(
+                const startIndex = valoresFormulario.lineaAVisualizar - 1;
+                const endIndex = startIndex + 300;
+
+                if ((index >= startIndex && index < endIndex) || (index === tablaDeSimulacion.length - 1)) {
+
+                  return(
                   <tr key={index}>
+                    <td>{index+1}</td>
                     <td>{fila.evento}</td>
                     <td>{fila.reloj}</td>
 
@@ -1349,7 +1470,7 @@ function App() {
                     ))}
                     <td>{Surtidor.colaComun.length}</td> */}
                   </tr> 
-                )
+                )}
               })}
             </tbody>
           </table>

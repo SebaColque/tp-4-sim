@@ -352,7 +352,7 @@ function App() {
     if (servicioLibreIndex !== -1) { // Si hay un equipo del Servicio libre
       listaServicio[servicioLibreIndex].cambiarEstado('Ocupado');
       nuevoCliente.cambiarEstado(`SA${nombreClase}-${servicioLibreIndex + 1}`);
-      nuevoCliente.cambiarHoraFinAtencion(horaFinAtencion.toFixed(4));
+      nuevoCliente.cambiarHoraFinAtencion(horaFinAtencion);
       // console.log(`**** servicioLibreIndex: ${servicioLibreIndex}`)
       nuevoCliente.cambiarServidorEnElQueEsta(servicioLibreIndex)
     } else { // Si todos los equipos del Servicio están ocupados
@@ -412,11 +412,11 @@ function App() {
     // horasImportantes[`finAtencion${nombreServicio}${indiceServicio - 1}`] = null;
     
     // // Verifica si hay más clientes en la cola común que servicios disponibles
-    // console.log(reloj)
-    // console.log(clase.colaComun)
-    // console.log(clase.colaComun.length)
+    console.log(reloj)
+    console.log('Clase cola: ', clase.colaComun)
+    console.log('clase cola largo: ', clase.colaComun.length)
     // console.log(servicios)
-    // console.log(servicios.length)
+    console.log('servi largo: ' ,servicios.length)
 
     if (clase.colaComun.length > servicios.length) {
       // Encuentra el índice del servicio libre
@@ -429,8 +429,8 @@ function App() {
         servicios[indiceServicio-1].cambiarEstado('Ocupado');
         siguienteCliente.cambiarEstado(`SA${nombreServicio}-${indiceServicio-1}`)
         siguienteCliente.cambiarServidorEnElQueEsta(indiceServicio-1)
-        horaFin = parseFloat((parseFloat(reloj) + parseFloat(1/tasaAtencionServicio)).toFixed(4))
-        console.log("HORA FINN: ", horaFin)
+        horaFin = parseFloat((parseFloat(reloj) + parseFloat(1/tasaAtencionServicio)))
+        // console.log("HORA FINN: ", horaFin)
         siguienteCliente.cambiarHoraFinAtencion(horaFin) // Actualiza con el tiempo correspondiente
         
         // Asigna el fin de atención al servicio correspondiente
@@ -438,7 +438,7 @@ function App() {
         // }
         }
         
-      console.log("HORA FINN: ", horaFin)
+      // console.log("HORA FINN: ", horaFin)
     return horaFin;
   };
   
@@ -643,12 +643,12 @@ function App() {
         // console.log(proximoEvento)
         // console.log(horasImportantes)
         evento = proximoEvento.proxNombre
-        reloj = proximoEvento.proxReloj.toFixed(4)
+        reloj = proximoEvento.proxReloj
 
         if (evento == 'llegadaClienteCombustible'){
 
           llegadaClienteCombustibleRND = parseFloat(Math.random())
-          llegadaClienteCombustibleTiempoEntreLlegadas = parseFloat((-1/valoresFormulario.tasaLlegadaCombustible * Math.log(1-llegadaClienteCombustibleRND)).toFixed(4))
+          llegadaClienteCombustibleTiempoEntreLlegadas = parseFloat((-1/valoresFormulario.tasaLlegadaCombustible * Math.log(1-llegadaClienteCombustibleRND)))
           horasImportantes.llegadaClienteCombustible = parseFloat(reloj) + llegadaClienteCombustibleTiempoEntreLlegadas
           
           rndVaKiosco = Math.random()
@@ -673,7 +673,7 @@ function App() {
 
         } else if(evento == 'llegadaClienteLavadero'){
           llegadaClienteLavaderoRND = parseFloat(Math.random())
-          llegadaClienteLavaderoTiempoEntreLlegadas = parseFloat((-1/valoresFormulario.tasaLlegadaLavadero * Math.log(1-llegadaClienteLavaderoRND)).toFixed(4))
+          llegadaClienteLavaderoTiempoEntreLlegadas = parseFloat((-1/valoresFormulario.tasaLlegadaLavadero * Math.log(1-llegadaClienteLavaderoRND)))
           horasImportantes.llegadaClienteLavadero = parseFloat(reloj) + llegadaClienteLavaderoTiempoEntreLlegadas
           
           rndVaKiosco = Math.random()
@@ -697,7 +697,7 @@ function App() {
 
         } else if(evento == 'llegadaClienteMantenimiento'){
           llegadaClienteMantenimientoRND = parseFloat(Math.random())
-          llegadaClienteMantenimientoTiempoEntreLlegadas = parseFloat((-1/valoresFormulario.tasaLlegadaMantenimiento * Math.log(1-llegadaClienteMantenimientoRND)).toFixed(4))
+          llegadaClienteMantenimientoTiempoEntreLlegadas = parseFloat((-1/valoresFormulario.tasaLlegadaMantenimiento * Math.log(1-llegadaClienteMantenimientoRND)))
           horasImportantes.llegadaClienteMantenimiento = parseFloat(reloj) + llegadaClienteMantenimientoTiempoEntreLlegadas
           
           rndVaKiosco = Math.random()
@@ -721,7 +721,7 @@ function App() {
 
         } else if(evento == 'llegadaClienteCaja'){
           llegadaClienteCajaRND = parseFloat(Math.random())
-          llegadaClienteCajaTiempoEntreLlegadas = parseFloat((-1/valoresFormulario.tasaLlegadaCajero * Math.log(1-llegadaClienteCajaRND)).toFixed(4))
+          llegadaClienteCajaTiempoEntreLlegadas = parseFloat((-1/valoresFormulario.tasaLlegadaCajero * Math.log(1-llegadaClienteCajaRND)))
           horasImportantes.llegadaClienteCaja = parseFloat(reloj) + llegadaClienteCajaTiempoEntreLlegadas
           
           rndVaKiosco = Math.random()
@@ -747,7 +747,7 @@ function App() {
           const indiceFinalTexto = evento.substring(evento.length-1,evento.length)
           const horaFin = finAtencionServicio(Kiosco, 'Kiosco', indiceFinalTexto, reloj, kioscos, valoresFormulario.tasaAtencionKiosco)
           
-          console.log(`RELOJ: ${reloj} - EVENTO: ${evento} - IndFinal: ${indiceFinalTexto} - HORAFIN: ${horaFin}}]`)
+          // console.log(`RELOJ: ${reloj} - EVENTO: ${evento} - IndFinal: ${indiceFinalTexto} - HORAFIN: ${horaFin}}]`)
 
           horasImportantes[`finAtencionKiosco${indiceFinalTexto}`] = null
           if(horaFin){
@@ -758,7 +758,7 @@ function App() {
           // console.log(reloj)
           const indiceFinalTexto = evento.substring(evento.length-1,evento.length)
           const horaFin = finAtencionServicio(Surtidor, 'Surtidor', indiceFinalTexto, reloj, surtidores, valoresFormulario.tasaAtencionSurtidor)
-          console.log(`RELOJ: ${reloj} - EVENTO: ${evento} - IndFinal: ${indiceFinalTexto} - HORAFIN: ${horaFin}}]`)
+          // console.log(`RELOJ: ${reloj} - EVENTO: ${evento} - IndFinal: ${indiceFinalTexto} - HORAFIN: ${horaFin}}]`)
 
           if(horaFin){
             horasImportantes[`finAtencionCombustible${indiceFinalTexto}`] = horaFin
@@ -769,7 +769,7 @@ function App() {
           // console.log(reloj)
           const indiceFinalTexto = evento.substring(evento.length-1,evento.length)
           const horaFin = finAtencionServicio(Lavadero, 'Lavadero', indiceFinalTexto, reloj, lavaderos, valoresFormulario.tasaAtencionLavadero)
-          console.log(`RELOJ: ${reloj} - EVENTO: ${evento} - IndFinal: ${indiceFinalTexto} - HORAFIN: ${horaFin}}]`)
+          // console.log(`RELOJ: ${reloj} - EVENTO: ${evento} - IndFinal: ${indiceFinalTexto} - HORAFIN: ${horaFin}}]`)
 
           if(horaFin){
             horasImportantes[`finAtencionLavadero${indiceFinalTexto}`] = horaFin
@@ -780,7 +780,7 @@ function App() {
           // console.log(reloj)
           const indiceFinalTexto = evento.substring(evento.length-1,evento.length)
           const horaFin = finAtencionServicio(MantenimientoRapido, 'Mantenimiento', indiceFinalTexto, reloj, mantenimientos, valoresFormulario.tasaAtencionMantenimiento)
-          console.log(`RELOJ: ${reloj} - EVENTO: ${evento} - IndFinal: ${indiceFinalTexto} - HORAFIN: ${horaFin}}]`)
+          // console.log(`RELOJ: ${reloj} - EVENTO: ${evento} - IndFinal: ${indiceFinalTexto} - HORAFIN: ${horaFin}}]`)
 
           if(horaFin){
             horasImportantes[`finAtencionMantenimiento${indiceFinalTexto}`] = horaFin
@@ -791,7 +791,7 @@ function App() {
           // console.log(reloj)
           const indiceFinalTexto = evento.substring(evento.length-1,evento.length)
           const horaFin = finAtencionServicio(Cajero, 'Caja', indiceFinalTexto, reloj, cajeros, valoresFormulario.tasaAtencionCajero)
-          console.log(`RELOJ: ${reloj} - EVENTO: ${evento} - IndFinal: ${indiceFinalTexto} - HORAFIN: ${horaFin}}]`)
+          // console.log(`RELOJ: ${reloj} - EVENTO: ${evento} - IndFinal: ${indiceFinalTexto} - HORAFIN: ${horaFin}}]`)
 
           if(horaFin){
             horasImportantes[`finAtencionCaja${indiceFinalTexto}`] = horaFin
@@ -803,7 +803,7 @@ function App() {
         // const a = 'finAtencionKiosco1'
         // console.log(a.substring(0,a.length-1)) 
         // console.log(a.substring(a.length-1,a.length))
-        console.log(reloj)
+        // console.log(reloj)
 
         const estadosSurtidores = surtidores.map((surtidor) => surtidor.estado);
         const horaFinSurtidores = [horasImportantes.finAtencionCombustible1,
@@ -863,7 +863,7 @@ function App() {
         
         tabla.push({
           evento: evento,
-          reloj: reloj,
+          reloj: parseFloat(reloj).toFixed(4),
   
           rndLlegadaCombustible: evento=='llegadaClienteCombustible' ? parseFloat(llegadaClienteCombustibleRND.toFixed(4)) : '',
           tiempoEntreLlegadasCombustible: evento=='llegadaClienteCombustible' ? parseFloat(llegadaClienteCombustibleTiempoEntreLlegadas.toFixed(4)) : '',

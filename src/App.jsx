@@ -85,6 +85,7 @@ class Cliente {
     this.estado = ''; // Estado inicial: Esperando atención surtidor
     this.horaLlegada = null;
     this.posicionLlegada = null;
+    this.servidorEnElQueEsta = null;
     this.horaFinAtencion = null;
   }
 
@@ -96,6 +97,9 @@ class Cliente {
   }
   cambiarPosicionLlegada(nuevaPosicionLlegada) {
     this.posicionLlegada = nuevaPosicionLlegada;
+  }
+  cambiarServidorEnElQueEsta(nuevoServidorEnElQueEsta) {
+    this.servidorEnElQueEsta = nuevoServidorEnElQueEsta;
   }
   cambiarHoraFinAtencion(nuevaHoraFinAtencion) {
     this.horaFinAtencion = nuevaHoraFinAtencion;
@@ -349,6 +353,8 @@ function App() {
       listaServicio[servicioLibreIndex].cambiarEstado('Ocupado');
       nuevoCliente.cambiarEstado(`SA${nombreClase}-${servicioLibreIndex + 1}`);
       nuevoCliente.cambiarHoraFinAtencion(horaFinAtencion.toFixed(4));
+      // console.log(`**** servicioLibreIndex: ${servicioLibreIndex}`)
+      nuevoCliente.cambiarServidorEnElQueEsta(servicioLibreIndex)
     } else { // Si todos los equipos del Servicio están ocupados
       nuevoCliente.cambiarEstado(`EA${nombreClase}`);
     }
@@ -360,7 +366,7 @@ function App() {
     setClientes([...clientes, nuevoCliente]);
     setLista([...listaServicio]); // Trigger re-render
 
-
+    // console.log(clase.colaComun)
     // console.log(servicioLibreIndex)
     return servicioLibreIndex
   };
@@ -376,10 +382,10 @@ function App() {
 
     // Encuentra el índice del cliente en la cola del servicio
     const indiceClienteEliminadoServicio = clase.colaComun.findIndex(cliente => cliente.horaFinAtencion === reloj);
-    console.log('-----------------')
-    console.log(reloj)
-    console.log(clase.colaComun.map((cl) => cl))
-    console.log('-----------------')
+    // console.log('-----------------')
+    // console.log(reloj)
+    // console.log(clase.colaComun.map((cl) => cl))
+    // console.log('-----------------')
     // console.log(`Reloj: ${reloj}`, `Serv: ${nombreServicio}`, `IndexS: ${indiceServicio}`, `IndexCl: ${indiceClienteEliminadoServicio}`);
     
     if(indiceClienteEliminadoServicio < 0) {
@@ -395,6 +401,7 @@ function App() {
     clienteEliminado.cambiarEstado('')
     clienteEliminado.cambiarHoraLlegada('')
     clienteEliminado.cambiarPosicionLlegada('')
+    clienteEliminado.cambiarServidorEnElQueEsta('')
     clienteEliminado.cambiarHoraFinAtencion('')
     // // Destruye el cliente (puede ser simplemente eliminando su referencia)
     // clienteEliminado = null;
@@ -421,14 +428,17 @@ function App() {
         const siguienteCliente = clase.colaComun.find(cliente => !cliente.horaFinAtencion)
         servicios[indiceServicio-1].cambiarEstado('Ocupado');
         siguienteCliente.cambiarEstado(`SA${nombreServicio}-${indiceServicio-1}`)
+        siguienteCliente.cambiarServidorEnElQueEsta(indiceServicio-1)
         horaFin = parseFloat((parseFloat(reloj) + parseFloat(1/tasaAtencionServicio)).toFixed(4))
+        console.log("HORA FINN: ", horaFin)
         siguienteCliente.cambiarHoraFinAtencion(horaFin) // Actualiza con el tiempo correspondiente
-  
+        
         // Asigna el fin de atención al servicio correspondiente
         // horasImportantes[`finAtencion${nombreServicio}${servicioLibreIndex + 1}`] = tiempoFinAtencion;
-      // }
-    }
-  
+        // }
+        }
+        
+      console.log("HORA FINN: ", horaFin)
     return horaFin;
   };
   
@@ -793,21 +803,63 @@ function App() {
         // const a = 'finAtencionKiosco1'
         // console.log(a.substring(0,a.length-1)) 
         // console.log(a.substring(a.length-1,a.length))
+        console.log(reloj)
 
         const estadosSurtidores = surtidores.map((surtidor) => surtidor.estado);
-        const horaFinSurtidores = Surtidor.colaComun.map((cliente) => cliente.horaFinAtencion);
+        const horaFinSurtidores = [horasImportantes.finAtencionCombustible1,
+          horasImportantes.finAtencionCombustible2,
+          horasImportantes.finAtencionCombustible3,
+          horasImportantes.finAtencionCombustible4,
+        ]
+        // const horaFinSurtidores = Surtidor.colaComun
+        //                           .filter(cliente => cliente.servidorEnElQueEsta !== null && cliente.horaFinAtencion !== null)
+        //                           .map(cliente => cliente.horaFinAtencion);
+        // console.log('surtidor')
+        // console.log(Surtidor.colaComun.map(c => c))
+        // console.log(horaFinSurtidores)
 
         const estadosLavaderos = lavaderos.map((lavadero) => lavadero.estado);
-        const horaFinLavaderos = Lavadero.colaComun.map((cliente) => cliente.horaFinAtencion);
+        const horaFinLavaderos = [horasImportantes.finAtencionLavadero1,
+          horasImportantes.finAtencionLavadero2
+        ]
+        // const horaFinLavaderos = Lavadero.colaComun
+        //                           .filter(cliente => cliente.servidorEnElQueEsta !== null && cliente.horaFinAtencion !== null)
+        //                           .map(cliente => cliente.horaFinAtencion);
+        // console.log('lavaderp')
+        // console.log(Lavadero.colaComun.map(c => c))
+        // console.log(horaFinLavaderos)
 
         const estadosMantenimiento = mantenimientos.map((mantenimiento) => mantenimiento.estado);
-        const horaFinMantenimiento = MantenimientoRapido.colaComun.map((cliente) => cliente.horaFinAtencion);
+        const horaFinMantenimiento = [horasImportantes.finAtencionMantenimiento1,
+          horasImportantes.finAtencionMantenimiento2
+        ]
+        // const horaFinMantenimiento = MantenimientoRapido.colaComun
+        //                           .filter(cliente => cliente.servidorEnElQueEsta !== null && cliente.horaFinAtencion !== null)
+        //                           .map(cliente => cliente.horaFinAtencion);
+        // console.log('mantenimi')
+        // console.log(MantenimientoRapido.colaComun.map(c => c))
+        // console.log(horaFinMantenimiento)
 
         const estadosCaja = cajeros.map((caja) => caja.estado);
-        const horaFinCaja = Cajero.colaComun.map((cliente) => cliente.horaFinAtencion);
+        const horaFinCaja = [horasImportantes.finAtencionCaja1,
+          horasImportantes.finAtencionCaja2
+        ]
+        // const horaFinCaja = Cajero.colaComun
+        //                           .filter(cliente => cliente.servidorEnElQueEsta !== null && cliente.horaFinAtencion !== null)
+        //                           .map(cliente => cliente.horaFinAtencion);
+        // console.log('caja')
+        // console.log(Cajero.colaComun.map(c => c))
+        // console.log(horaFinCaja)
 
         const estadosKiosco = kioscos.map((kisoco) => kisoco.estado);
-        const horaFinKiosco = Kiosco.colaComun.map((cliente) => cliente.horaFinAtencion);
+        const horaFinKiosco = [horasImportantes.finAtencionKiosco1]
+        // const horaFinKiosco = Kiosco.colaComun
+        //                           .filter(cliente => cliente.servidorEnElQueEsta !== null && cliente.horaFinAtencion !== null)
+        //                           .map(cliente => cliente.horaFinAtencion);
+
+        // console.log('kisoco')
+        // console.log(Kiosco.colaComun.map(c => c))
+        // console.log(horaFinKiosco)
         
         tabla.push({
           evento: evento,
@@ -835,21 +887,21 @@ function App() {
           vaKiosco: evento.substring(0,7)=='llegada'  
                         ? rndVaKiosco >= 0.25 ? 'No' : 'Sí'
                         : '',
-          finAtencionKiosco1: horaFinKiosco[0],
+          finAtencionKiosco1: horaFinKiosco[0] ? parseFloat(horaFinKiosco[0]).toFixed(4) : '',
 
-          finAtencionCombustible1: horaFinSurtidores[0],
-          finAtencionCombustible2: horaFinSurtidores[1],
-          finAtencionCombustible3: horaFinSurtidores[2],
-          finAtencionCombustible4: horaFinSurtidores[3],
+          finAtencionCombustible1: horaFinSurtidores[0] ? parseFloat(horaFinSurtidores[0]).toFixed(4) : '',
+          finAtencionCombustible2: horaFinSurtidores[1] ? parseFloat(horaFinSurtidores[1]).toFixed(4) : '',
+          finAtencionCombustible3: horaFinSurtidores[2] ? parseFloat(horaFinSurtidores[2]).toFixed(4) : '',
+          finAtencionCombustible4: horaFinSurtidores[3] ? parseFloat(horaFinSurtidores[3]).toFixed(4) : '',
 
-          finAtencionLavadero1: horaFinLavaderos[0],
-          finAtencionLavadero2: horaFinLavaderos[1],
+          finAtencionLavadero1: horaFinLavaderos[0] ? parseFloat(horaFinLavaderos[0]).toFixed(4) : '',
+          finAtencionLavadero2: horaFinLavaderos[1] ? parseFloat(horaFinLavaderos[1]).toFixed(4) : '',
 
-          finAtencionMantenimiento1: horaFinMantenimiento[0],
-          finAtencionMantenimiento2: horaFinMantenimiento[1],
+          finAtencionMantenimiento1: horaFinMantenimiento[0] ? parseFloat(horaFinMantenimiento[0]).toFixed(4) : '',
+          finAtencionMantenimiento2: horaFinMantenimiento[1] ? parseFloat(horaFinMantenimiento[1]).toFixed(4) : '',
 
-          finAtencionCaja1: horaFinCaja[0],
-          finAtencionCaja2: horaFinCaja[1],
+          finAtencionCaja1: horaFinCaja[0] ? parseFloat(horaFinCaja[0]).toFixed(4) : '',
+          finAtencionCaja2: horaFinCaja[1] ? parseFloat(horaFinCaja[1]).toFixed(4) : '',
 
           surtidor1: estadosSurtidores[0],
           surtidor2: estadosSurtidores[1],

@@ -1,6 +1,9 @@
 /* eslint-disable no-unused-vars */
 import { useState } from 'react'
 import './App.css'
+// import equal from 'fast-deep-equal';
+// import _ from 'lodash';
+
 
 // OBJETOS PERMANENTES {}{}{{}{}{}}{{}{}}{}{}{}{{}{}{}}{{}}{{}{}}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{{}}{}{{}}{{}}{}{{}}{}{}{{}{}}{{}{}}{}{}{{}}
 class Surtidor {
@@ -82,7 +85,7 @@ class Kiosco {
 // CLIENTE - OBJETO TEMPORAL {}{}{{}{}{}}{{}{}}{}{}{}{{}{}{}}{{}}{{}{}}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{{}}{}{{}}{{}}{}{{}}{}{}{{}{}}{{}{}}{}{}{{}}
 class Cliente {
   constructor() {
-    this.estado = ''; // Estado inicial: Esperando atención surtidor
+    this.estado = '';
     this.horaLlegada = null;
     this.posicionLlegada = null;
     this.servidorEnElQueEsta = null;
@@ -105,19 +108,6 @@ class Cliente {
     this.horaFinAtencion = nuevaHoraFinAtencion;
   }
 }
-
-const estados = [
-  'EAS', // Esperando atención surtidor
-  'SAS', // Siendo atendido en surtidor
-  'EAL', // Esperando atención lavado
-  'SAL', // Siendo atendido en lavadero
-  'EAM', // Esperando atención en mantenimiento
-  'SAM', // Siendo atendido en mantenimiento
-  'EAC', // Esperando atención en caja
-  'SAC',  // Siendo atendido en caja
-  'EAK', // Esperando atención en caja
-  'SAK'  // Siendo atendido en caja
-];
 
 
 function App() {
@@ -178,16 +168,6 @@ function App() {
     new Surtidor()
   ]);
 
-  const agregarClienteAColaSurtidor = (cliente) => {
-    Surtidor.colaComun.push(cliente);
-    setSurtidores([...surtidores]); // Trigger re-render
-  };
-
-  const cambiarEstadoSurtidor = (index) => {
-    const nuevosSurtidores = [...surtidores];
-    nuevosSurtidores[index].estado = nuevosSurtidores[index].estado === 'Libre' ? 'Ocupado' : 'Libre';
-    setSurtidores(nuevosSurtidores);
-  };
 
   // LAVADEROS {}{}{{}{}{}}{{}{}}{}{}{}{{}{}{}}{{}}{{}{}}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{{}}{}{{}}{{}}{}{{}}{}{}{{}{}}{{}{}}{}{}{{}}
   const [lavaderos, setLavaderos] = useState([
@@ -195,16 +175,6 @@ function App() {
     new Lavadero()
   ]);
 
-  const agregarClienteColaLavadero = (cliente) => {
-    Lavadero.colaComun.push(cliente);
-    setLavaderos([...lavaderos]); // Trigger re-render
-  };
-
-  const cambiarEstadoLavadero = (index) => {
-    const nuevosLavaderos = [...lavaderos];
-    nuevosLavaderos[index].estado = nuevosLavaderos[index].estado === 'Libre' ? 'Ocupado' : 'Libre';
-    setLavaderos(nuevosLavaderos);
-  };
 
   // MANTENIMIENTO {}{}{{}{}{}}{{}{}}{}{}{}{{}{}{}}{{}}{{}{}}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{{}}{}{{}}{{}}{}{{}}{}{}{{}{}}{{}{}}{}{}{{}}
   const [mantenimientos, setMantenimientos] = useState([
@@ -212,16 +182,6 @@ function App() {
     new MantenimientoRapido()
   ]);
 
-  const agregarClienteAColaMantenimiento = (cliente) => {
-    MantenimientoRapido.colaComun.push(cliente);
-    setMantenimientos([...mantenimientos]); // Trigger re-render
-  };
-
-  const cambiarEstadoMantenimientos = (index) => {
-    const nuevosMantenimientos = [...mantenimientos];
-    nuevosMantenimientos[index].estado = nuevosMantenimientos[index].estado === 'Libre' ? 'Ocupado' : 'Libre';
-    setMantenimientos(nuevosMantenimientos);
-  };
 
   // CAJERO {}{}{{}{}{}}{{}{}}{}{}{}{{}{}{}}{{}}{{}{}}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{{}}{}{{}}{{}}{}{{}}{}{}{{}{}}{{}{}}{}{}{{}}
   const [cajeros, setCajeros] = useState([
@@ -229,98 +189,22 @@ function App() {
     new Cajero()
   ]);
 
-  const agregarClienteColaCajero = (cliente) => {
-    Cajero.colaComun.push(cliente);
-    setCajeros([...cajeros]); // Trigger re-render
-  };
-
-  const cambiarEstadoCajeros = (index) => {
-    const nuevosCajeros = [...cajeros];
-    nuevosCajeros[index].estado = nuevosCajeros[index].estado === 'Libre' ? 'Ocupado' : 'Libre';
-    setCajeros(nuevosCajeros);
-  };
 
   // KIOSCO {}{}{{}{}{}}{{}{}}{}{}{}{{}{}{}}{{}}{{}{}}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{{}}{}{{}}{{}}{}{{}}{}{}{{}{}}{{}{}}{}{}{{}}
   const [kioscos, setKioscos] = useState([
     new Kiosco(),
   ]);
 
-  const agregarClienteColaKiosco = (cliente) => {
-    Kiosco.colaComun.push(cliente);
-    setKioscos([...kioscos]); // Trigger re-render
-  };
-
-  const cambiarEstadoKioscos = (index) => {
-    const nuevosKioscos = [...kioscos];
-    nuevosKioscos[index].estado = nuevosKioscos[index].estado === 'Libre' ? 'Ocupado' : 'Libre';
-    setKioscos(nuevosKioscos);
-  };
-
 
 
   // CLIENTE {}{}{{}{}{}}{{}{}}{}{}{}{{}{}{}}{{}}{{}{}}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{{}}{}{{}}{{}}{}{{}}{}{}{{}{}}{{}{}}{}{}{{}}
   const [clientes, setClientes] = useState([]);
 
-  const agregarCliente = () => {
-    const nuevoCliente = new Cliente();
-    setClientes([...clientes, nuevoCliente]);
-  };
-
-  const cambiarEstadoCliente = (index, nuevoEstado) => {
-    const nuevosClientes = [...clientes];
-    nuevosClientes[index].cambiarEstado(nuevoEstado);
-    setClientes(nuevosClientes);
-  };
-
-
-  // VECOTRES PARA TABLA {}{}{{}{}{}}{{}{}}{}{}{}{{}{}{}}{{}}{{}{}}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{{}}{}{{}}{{}}{}{{}}{}{}{{}{}}{{}{}}{}{}{{}}
-  // EVENTO
-  const [evento, setEvento] = useState('Inicialización');
-
-  // RELOJ
-  const [reloj, setReloj] = useState(0);
-
-  // LLEGADA CLIENTE COMBUSTIBLE
-  const [llegadaClienteCombustible, setllegadaClienteCombustible] = useState({
-    RND: 0,
-    tiempoEntreLLegadas: 0,
-    proximaLlegada: 0
-  });
-  // LLEGADA CLIENTE LAVADERO
-  const [llegadaClienteLavadero, setllegadaClienteLavadero] = useState({
-    RND: 0,
-    tiempoEntreLLegadas: 0,
-    proximaLlegada: 0
-  });
-  // LLEGADA CLIENTE MANTENIMIENTO
-  const [llegadaClienteMantenimiento, setllegadaClienteMantenimiento] = useState({
-    RND: 0,
-    tiempoEntreLLegadas: 0,
-    proximaLlegada: 0
-  });
-  // LLEGADA CLIENTE CAJA
-  const [llegadaClienteCaja, setllegadaClienteCaja] = useState({
-    RND: 0,
-    tiempoEntreLLegadas: 0,
-    proximaLlegada: 0
-  });
-
 
   // SIMULACIÓN {}{}{{}{}{}}{{}{}}{}{}{}{{}{}{}}{{}}{{}{}}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{{}}{}{{}}{{}}{}{{}}{}{}{{}{}}{{}{}}{}{}{{}}
   const [tablaDeSimulacion, setTablaDeSimulacion] = useState([])
+  const [clientesDelSistema, setClientesDelSistema] = useState([])
 
-
-  // const calcularProximaLlegadaAServicio = (tasaLlegadaServicio) => {
-  //   const llegadaClienteServicioRND = parseFloat(Math.random())
-  //   const llegadaClienteServicioTiempoEntreLlegadas = -1/valoresFormulario[tasaLlegadaServicio] * Math.log(1-llegadaClienteServicioRND)
-    
-  //   // setllegadaClienteCombustible({
-  //   //   RND: llegadaClienteCombustibleRND,
-  //   //   tiempoEntreLLegadas: llegadaClienteCombustibleTiempoEntreLlegadas,
-  //   //   proximaLlegada: reloj + llegadaClienteCombustibleTiempoEntreLlegadas
-  //   // })
-  //   return [llegadaClienteServicioRND, llegadaClienteServicioTiempoEntreLlegadas]
-  // }
 
   const encontrarProxHoraImportante = (obj) => {
     let proxNombre = null;
@@ -343,10 +227,11 @@ function App() {
   let cantidadClientesIngresaronCaja = 0
   let cantidadClientesIngresaronKiosco = 0
 
+  let clientesDelSistemaT = []
+
   const agregarClienteAServicio = (listaServicio, nombreClase, clase, setLista, horaFinAtencion, horaActual, finAtencionString) => {
     let servicioLibreIndex = -1;
 
-    // Buscar el primer equipo del servicio libre
     for (let i = 0; i < listaServicio.length; i++) {
       if (listaServicio[i].estado === 'Libre') {
         servicioLibreIndex = i;
@@ -356,13 +241,12 @@ function App() {
     
     const nuevoCliente = new Cliente();
 
-    if (servicioLibreIndex !== -1) { // Si hay un equipo del Servicio libre
+    if (servicioLibreIndex !== -1) {
       listaServicio[servicioLibreIndex].cambiarEstado('Ocupado');
       nuevoCliente.cambiarEstado(`SA${nombreClase}-${servicioLibreIndex + 1}`);
       nuevoCliente.cambiarHoraFinAtencion(horaFinAtencion);
-      // console.log(`**** servicioLibreIndex: ${servicioLibreIndex}`)
       nuevoCliente.cambiarServidorEnElQueEsta(servicioLibreIndex)
-    } else { // Si todos los equipos del Servicio están ocupados
+    } else {
       nuevoCliente.cambiarEstado(`EA${nombreClase}`);
     }
 
@@ -370,8 +254,10 @@ function App() {
     nuevoCliente.cambiarHoraLlegada(horaActual);
 
     clase.colaComun.push(nuevoCliente);
-    setClientes([...clientes, nuevoCliente]);
-    setLista([...listaServicio]); // Trigger re-render
+    // setClientes([...clientes, nuevoCliente]);
+    // clientesDelSistemaT.push({...nuevoCliente})
+    // setClientesDelSistema([...clientesDelSistema, nuevoCliente])
+    setLista([...listaServicio]);
 
     if(nombreClase == 'Surtidor'){
       cantidadClientesIngresaronCombustible += 1
@@ -381,13 +267,11 @@ function App() {
       cantidadClientesIngresaronLavadero += 1
     } else if(nombreClase == 'Mantenimiento'){
       cantidadClientesIngresaronMantenimiento += 1
-    } else if(nombreClase == 'Cajero'){
+    } else if(nombreClase == 'Caja'){
       cantidadClientesIngresaronCaja += 1
     }
 
-    // console.log(clase.colaComun)
-    // console.log(servicioLibreIndex)
-    return servicioLibreIndex
+    return [servicioLibreIndex, nuevoCliente]
   };
 
   
@@ -403,40 +287,66 @@ function App() {
   let acClientesAtendidosCaja = 0
   let acClientesAtendidosKiosco = 0
 
+
+  function compararObjetos(objeto1, objeto2) {
+    if (objeto1 === objeto2) return true;
+    if (objeto1 === null || objeto2 === null) return false;
+    if (typeof objeto1 !== typeof objeto2) return false;
+
+    if (typeof objeto1 !== 'object') return objeto1 === objeto2;
+
+    if (Array.isArray(objeto1) !== Array.isArray(objeto2)) return false;
+
+    if (Array.isArray(objeto1)) {
+        if (objeto1.length !== objeto2.length) return false;
+        for (let i = 0; i < objeto1.length; i++) {
+            if (!compararObjetos(objeto1[i], objeto2[i])) return false;
+        }
+        return true;
+    }
+
+    const keys1 = Object.keys(objeto1);
+    const keys2 = Object.keys(objeto2);
+    if (keys1.length !== keys2.length) return false;
+
+    for (let key of keys1) {
+        if (!keys2.includes(key) || !compararObjetos(objeto1[key], objeto2[key])) return false;
+    }
+    return true;
+}
+
   const finAtencionServicio = (clase, nombreServicio, indiceServicio, reloj, servicios, tasaAtencionServicio) => {
     let horaFin 
-    
-    // console.log(nombreServicio)
-    // console.log(indiceServicio)
-    // console.log(servicios)
-    // console.log(clase.colaComun)
 
-    // Encuentra el índice del cliente en la cola del servicio
     const indiceClienteEliminadoServicio = clase.colaComun.findIndex(cliente => cliente.horaFinAtencion === reloj);
-    // console.log('-----------------')
-    // console.log(reloj)
-    // console.log(clase.colaComun.map((cl) => cl))
-    // console.log('-----------------')
-    // console.log(`Reloj: ${reloj}`, `Serv: ${nombreServicio}`, `IndexS: ${indiceServicio}`, `IndexCl: ${indiceClienteEliminadoServicio}`);
     
     if(indiceClienteEliminadoServicio < 0) {
       return horaFin
     }
 
-    // Elimina el cliente de la cola del servicio
     const intercambiar = clase.colaComun.length > servicios.length
     const clienteEliminado = clase.colaComun.splice(indiceClienteEliminadoServicio, 1)[0];
-    // console.log(clienteEliminado)
 
-    // const indiceClienteEliminadoClientes = clientes.findIndex(cliente => cliente.horaFinAtencion === reloj);
-    // console.log(indiceClienteEliminadoClientes)
+    // const clientesMap = new Map(clientesDelSistemaT.map(cliente => [cliente.horaLlegada, cliente]));
+    // const clienteEnElSistema = clientesDelSistemaT.map(c => c).find(cl => compararObjetos(clienteEliminado, cl))
+    // const clienteEnElSistema = Array.from(clientesMap.values()).find(cl => compararObjetos(clienteEliminado, cl));
+    // const clienteEnElSistema = Array.from(clientesMap.values()).find(cl => equal(clienteEliminado, cl));
+    // const clienteEnElSistema = Array.from(clientesMap.values()).find(cl => _.isEqual(clienteEliminado, cl));
+    // const clienteEnElSistema = clientesMap.get(clienteEliminado.horaLlegada);
+    // const clienteEnElSistema = clientesDelSistemaT.find(c => c.horaLlegada == clienteEliminado.horaLlegada)
+
+
+    // if(clienteEnElSistema){
+    //   // clienteEnElSistema = null
+    //   clienteEnElSistema['estado'] = ''
+    //   clienteEnElSistema['horaLlegada'] = ''
+    // }
+
     clienteEliminado.cambiarEstado('')
     clienteEliminado.cambiarHoraLlegada('')
     clienteEliminado.cambiarPosicionLlegada('')
     clienteEliminado.cambiarServidorEnElQueEsta('')
     clienteEliminado.cambiarHoraFinAtencion('')
-    // // Destruye el cliente (puede ser simplemente eliminando su referencia)
-    // clienteEliminado = null;
 
     if(nombreServicio == 'Kiosco'){
       acClientesAtendidosKiosco += 1
@@ -450,37 +360,30 @@ function App() {
       acClientesAtendidosCaja += 1
     }
   
-    // // Actualiza horasImportantes
-    // horasImportantes[`finAtencion${nombreServicio}${indiceServicio - 1}`] = null;
-    
-    // // Verifica si hay más clientes en la cola común que servicios disponibles
-    // console.log(reloj)
-    // console.log('Clase cola: ', clase.colaComun)
-    // console.log('clase cola largo: ', clase.colaComun.length)
-    // console.log(servicios)
-    // console.log('servi largo: ' ,servicios.length)
-
-    // console.log(reloj, clase.colaComun.length, servicios.length)
-
-    // if (clase.colaComun.length > servicios.length) {
     if (intercambiar) {
-      // Encuentra el índice del servicio libre
-      // const servicioLibreIndex = servicios.findIndex(servicio => servicio.estado === 'Libre');
-      // console.log(`reloj: ${reloj}`, `servicioLibreIndex: ${servicioLibreIndex}`)
-
-      // if (servicioLibreIndex !== -1) {
-        // Mueve al siguiente cliente de la cola al servicio libre
         const siguienteCliente = clase.colaComun.find(cliente => !cliente.horaFinAtencion)
+        
+        // const clientesMap = new Map(clientesDelSistemaT.map(cliente => [cliente.horaLlegada, cliente]));
+
+        // const clienteEnElSistema = clientesDelSistemaT.map(c => c).find(cl => compararObjetos(clienteEliminado, cl))
+        // const clienteEnElSistema = Array.from(clientesMap.values()).find(cl => compararObjetos(clienteEliminado, cl));
+        // const clienteEnElSistema = Array.from(clientesMap.values()).find(cl => equal(clienteEliminado, cl));
+        // const clienteEnElSistema = Array.from(clientesMap.values()).find(cl => _.isEqual(clienteEliminado, cl));
+        // const clienteEnElSistema = clientesMap.get(clienteEliminado.horaLlegada);
+        // const clienteEnElSistema = clientesDelSistemaT.find(c => c.horaLlegada == clienteEliminado.horaLlegada)
+
+
         servicios[indiceServicio-1].cambiarEstado('Ocupado');
-        siguienteCliente.cambiarEstado(`SA${nombreServicio}-${indiceServicio-1}`)
+        siguienteCliente.cambiarEstado(`SA${nombreServicio}-${indiceServicio}`)
         siguienteCliente.cambiarServidorEnElQueEsta(indiceServicio-1)
         horaFin = parseFloat((parseFloat(reloj) + parseFloat(1/tasaAtencionServicio)))
-        // console.log("HORA FINN: ", horaFin)
-        siguienteCliente.cambiarHoraFinAtencion(horaFin) // Actualiza con el tiempo correspondiente
-        
-        // Asigna el fin de atención al servicio correspondiente
-        // horasImportantes[`finAtencion${nombreServicio}${servicioLibreIndex + 1}`] = tiempoFinAtencion;
-        // }
+          // if(clienteEnElSistema){
+          //   clienteEnElSistema['estado'] = `SA${nombreServicio}-${indiceServicio}`
+          //   clienteEnElSistema['servidorEnElQueEsta'] = indiceServicio-1
+          //   clienteEnElSistema['horaFinAtencion'] = horaFin
+          // }
+        siguienteCliente.cambiarHoraFinAtencion(horaFin) 
+
 
         if(nombreServicio == 'Kiosco'){
           tiempoAcEsperaKiosco += reloj - siguienteCliente.horaLlegada
@@ -498,7 +401,6 @@ function App() {
           servicios[indiceServicio-1].cambiarEstado('Libre')
         }
         
-      // console.log("HORA FINN: ", horaFin)
     return horaFin;
   };
   
@@ -522,7 +424,6 @@ function App() {
       llegadaClienteCaja: 0,
   
       llegadaClienteKiosco: null,
-      // proxLlegadaKisoco: 0,
   
       finAtencionKiosco1: null,
       finAtencionCombustible1: null,
@@ -543,6 +444,8 @@ function App() {
       let estadosCajaAnterior = []
       let estadosKioscoAnterior = []
       let relojAnterior = 0
+
+      let clientesSistemas = []
     
     for(var i = 0; i < valoresFormulario.lineasASimular; i++){
       let llegadaClienteCombustibleRND
@@ -559,59 +462,27 @@ function App() {
 
       let rndVaKiosco
       
-      
 
       if(i == 0){
-        // setEvento('Inicialización')
-        // setReloj(0)
         evento = 'Inicialización'
         reloj = 0
 
-        // COMBUSTIBLE
-        // llegada_cliente_combustible
         llegadaClienteCombustibleRND = parseFloat(Math.random())
         llegadaClienteCombustibleTiempoEntreLlegadas = -1/valoresFormulario.tasaLlegadaCombustible * Math.log(1-llegadaClienteCombustibleRND)
         horasImportantes.llegadaClienteCombustible = reloj + llegadaClienteCombustibleTiempoEntreLlegadas
-        // setllegadaClienteCombustible({
-        //   RND: llegadaClienteCombustibleRND,
-        //   tiempoEntreLLegadas: llegadaClienteCombustibleTiempoEntreLlegadas,
-        //   proximaLlegada: reloj + llegadaClienteCombustibleTiempoEntreLlegadas
-        // })
 
-        // LAVADERO
-        // llegada_cliente_lavado
         llegadaClienteLavaderoRND = parseFloat(Math.random())
         llegadaClienteLavaderoTiempoEntreLlegadas = -1/valoresFormulario.tasaLlegadaLavadero * Math.log(1-llegadaClienteLavaderoRND)
         horasImportantes.llegadaClienteLavadero = reloj + llegadaClienteLavaderoTiempoEntreLlegadas
-        // setllegadaClienteLavadero({
-        //   RND: llegadaClienteLavaderoRND,
-        //   tiempoEntreLLegadas: llegadaClienteLavaderoTiempoEntreLlegadas,
-        //   proximaLlegada: reloj + llegadaClienteLavaderoTiempoEntreLlegadas
-        // })
 
-        // MANTENIMIENTO
-        // llegada_cliente_mantenimiento
         llegadaClienteMantenimientoRND = parseFloat(Math.random())
         llegadaClienteMantenimientoTiempoEntreLlegadas = -1/valoresFormulario.tasaLlegadaMantenimiento * Math.log(1-llegadaClienteMantenimientoRND)
         horasImportantes.llegadaClienteMantenimiento = reloj + llegadaClienteMantenimientoTiempoEntreLlegadas
-        // setllegadaClienteMantenimiento({
-        //   RND: llegadaClienteMantenimientoRND,
-        //   tiempoEntreLLegadas: llegadaClienteMantenimientoTiempoEntreLlegadas,
-        //   proximaLlegada: reloj + llegadaClienteMantenimientoTiempoEntreLlegadas
-        // })
 
-        // CAJA
-        // llegada_cliente_caja
         llegadaClienteCajaRND = parseFloat(Math.random())
         llegadaClienteCajaTiempoEntreLlegadas = -1/valoresFormulario.tasaLlegadaCajero * Math.log(1-llegadaClienteCajaRND)
         horasImportantes.llegadaClienteCaja = reloj + llegadaClienteCajaTiempoEntreLlegadas
-        // setllegadaClienteCaja({
-        //   RND: llegadaClienteCajaRND,
-        //   tiempoEntreLLegadas: llegadaClienteCajaTiempoEntreLlegadas,
-        //   proximaLlegada: reloj + llegadaClienteCajaTiempoEntreLlegadas
-        // })
 
-        
         const estadosSurtidores = surtidores.map((surtidor) => surtidor.estado);
         tabla.push({
           evento: evento,
@@ -711,12 +582,20 @@ function App() {
           acClientesAtendidosKiosco: 0,
 
           servicioConMasCola: '',
+
+          clientesSistema: []
         })
       } else{
 
+        // console.log(i % 1000 == 0 ? i : '')
+        // if(i % 1000 == 0){
+        //   // console.log(clientesDelSistemaT)
+        //   clientesDelSistemaT.splice(0, 500);
+        //   // console.log(clientesDelSistemaT)
+        // }
+
         const proximoEvento = encontrarProxHoraImportante(horasImportantes);
-        // console.log(proximoEvento)
-        // console.log(horasImportantes)
+
         evento = proximoEvento.proxNombre
         reloj = proximoEvento.proxReloj
 
@@ -730,7 +609,9 @@ function App() {
           if(rndVaKiosco >= 0.25){
 
             const horaFinAtencion = parseFloat(reloj) + parseFloat(1/valoresFormulario.tasaAtencionSurtidor)
-            const indiceServicioLibre = agregarClienteAServicio(surtidores, 'Surtidor', Surtidor, setSurtidores, horaFinAtencion, reloj, 'finAtencionCombustible', horasImportantes)
+            const [indiceServicioLibre, nuevoCliente] = agregarClienteAServicio(surtidores, 'Surtidor', Surtidor, setSurtidores, horaFinAtencion, reloj, 'finAtencionCombustible', horasImportantes)
+            clientesSistemas.push(nuevoCliente)
+
             if(indiceServicioLibre >= 0){
               horasImportantes[`finAtencionCombustible${indiceServicioLibre+1}`] = horaFinAtencion
             }
@@ -738,7 +619,9 @@ function App() {
           } else{
 
             const horaFinAtencion = parseFloat(reloj) + parseFloat(1/valoresFormulario.tasaAtencionKiosco)
-            const indiceServicioLibre = agregarClienteAServicio(kioscos, 'Kiosco', Kiosco, setKioscos, horaFinAtencion, reloj)
+            const [indiceServicioLibre, nuevoCliente] = agregarClienteAServicio(kioscos, 'Kiosco', Kiosco, setKioscos, horaFinAtencion, reloj)
+            clientesSistemas.push(nuevoCliente)
+
             if(indiceServicioLibre >= 0){
               horasImportantes[`finAtencionKiosco${indiceServicioLibre+1}`] = horaFinAtencion
             }
@@ -755,7 +638,8 @@ function App() {
           if(rndVaKiosco >= 0.25){
 
             const horaFinAtencion = parseFloat(reloj) + parseFloat(1/valoresFormulario.tasaAtencionLavadero)
-            const indiceServicioLibre = agregarClienteAServicio(lavaderos, 'Lavadero', Lavadero, setLavaderos, horaFinAtencion, reloj)
+            const [indiceServicioLibre, nuevoCliente] = agregarClienteAServicio(lavaderos, 'Lavadero', Lavadero, setLavaderos, horaFinAtencion, reloj)
+            clientesSistemas.push(nuevoCliente)
             if(indiceServicioLibre >= 0){
               horasImportantes[`finAtencionLavadero${indiceServicioLibre+1}`] = horaFinAtencion
             }
@@ -763,7 +647,9 @@ function App() {
           } else{
 
             const horaFinAtencion = parseFloat(reloj) + parseFloat(1/valoresFormulario.tasaAtencionKiosco)
-            const indiceServicioLibre = agregarClienteAServicio(kioscos, 'Kiosco', Kiosco, setKioscos, horaFinAtencion, reloj)
+            const [indiceServicioLibre, nuevoCliente] = agregarClienteAServicio(kioscos, 'Kiosco', Kiosco, setKioscos, horaFinAtencion, reloj)
+            clientesSistemas.push(nuevoCliente)
+
             if(indiceServicioLibre >= 0){
               horasImportantes[`finAtencionKiosco${indiceServicioLibre+1}`] = horaFinAtencion
             }
@@ -779,7 +665,9 @@ function App() {
           if(rndVaKiosco >= 0.25){
 
             const horaFinAtencion = parseFloat(reloj) + parseFloat(1/valoresFormulario.tasaAtencionMantenimiento)
-            const indiceServicioLibre = agregarClienteAServicio(mantenimientos, 'Mantenimiento', MantenimientoRapido, setMantenimientos, horaFinAtencion, reloj)
+            const [indiceServicioLibre, nuevoCliente] = agregarClienteAServicio(mantenimientos, 'Mantenimiento', MantenimientoRapido, setMantenimientos, horaFinAtencion, reloj)
+            clientesSistemas.push(nuevoCliente)
+
             if(indiceServicioLibre >= 0){
               horasImportantes[`finAtencionMantenimiento${indiceServicioLibre+1}`] = horaFinAtencion
             }
@@ -787,7 +675,9 @@ function App() {
           } else{
 
             const horaFinAtencion = parseFloat(reloj) + parseFloat(1/valoresFormulario.tasaAtencionKiosco)
-            const indiceServicioLibre = agregarClienteAServicio(kioscos, 'Kiosco', Kiosco, setKioscos, horaFinAtencion, reloj)
+            const [indiceServicioLibre, nuevoCliente] = agregarClienteAServicio(kioscos, 'Kiosco', Kiosco, setKioscos, horaFinAtencion, reloj)
+            clientesSistemas.push(nuevoCliente)
+
             if(indiceServicioLibre >= 0){
               horasImportantes[`finAtencionKiosco${indiceServicioLibre+1}`] = horaFinAtencion
             }
@@ -803,7 +693,10 @@ function App() {
           if(rndVaKiosco >= 0.25){
 
             const horaFinAtencion = parseFloat(reloj) + parseFloat(1/valoresFormulario.tasaAtencionCajero)
-            const indiceServicioLibre = agregarClienteAServicio(cajeros, 'Cajero', Cajero, setCajeros, horaFinAtencion, reloj)
+            // const [indiceServicioLibre, nuevoCliente] = agregarClienteAServicio(cajeros, 'Cajero', Cajero, setCajeros, horaFinAtencion, reloj)
+            const [indiceServicioLibre, nuevoCliente] = agregarClienteAServicio(cajeros, 'Caja', Cajero, setCajeros, horaFinAtencion, reloj)
+            clientesSistemas.push(nuevoCliente)
+
             if(indiceServicioLibre >= 0){
               horasImportantes[`finAtencionCaja${indiceServicioLibre+1}`] = horaFinAtencion
             }
@@ -811,18 +704,18 @@ function App() {
           } else{
 
             const horaFinAtencion = parseFloat(reloj) + parseFloat(1/valoresFormulario.tasaAtencionKiosco)
-            const indiceServicioLibre = agregarClienteAServicio(kioscos, 'Kiosco', Kiosco, setKioscos, horaFinAtencion, reloj)
+            const [indiceServicioLibre, nuevoCliente] = agregarClienteAServicio(kioscos, 'Kiosco', Kiosco, setKioscos, horaFinAtencion, reloj)
+            clientesSistemas.push(nuevoCliente)
+
             if(indiceServicioLibre >= 0){
               horasImportantes[`finAtencionKiosco${indiceServicioLibre+1}`] = horaFinAtencion
             }
 
           }
         } else if(evento.substring(0,evento.length-1) == 'finAtencionKiosco'){
-          // console.log(reloj)
           const indiceFinalTexto = evento.substring(evento.length-1,evento.length)
           const horaFin = finAtencionServicio(Kiosco, 'Kiosco', indiceFinalTexto, reloj, kioscos, valoresFormulario.tasaAtencionKiosco)
           
-          // console.log(`RELOJ: ${reloj} - EVENTO: ${evento} - IndFinal: ${indiceFinalTexto} - HORAFIN: ${horaFin}}]`)
 
           horasImportantes[`finAtencionKiosco${indiceFinalTexto}`] = null
           if(horaFin){
@@ -830,10 +723,8 @@ function App() {
           }
 
         } else if(evento.substring(0,evento.length-1) == 'finAtencionCombustible'){
-          // console.log(reloj)
           const indiceFinalTexto = evento.substring(evento.length-1,evento.length)
           const horaFin = finAtencionServicio(Surtidor, 'Surtidor', indiceFinalTexto, reloj, surtidores, valoresFormulario.tasaAtencionSurtidor)
-          // console.log(`RELOJ: ${reloj} - EVENTO: ${evento} - IndFinal: ${indiceFinalTexto} - HORAFIN: ${horaFin}}]`)
 
           if(horaFin){
             horasImportantes[`finAtencionCombustible${indiceFinalTexto}`] = horaFin
@@ -841,10 +732,8 @@ function App() {
             horasImportantes[`finAtencionCombustible${indiceFinalTexto}`] = null
           }
         } else if(evento.substring(0,evento.length-1) == 'finAtencionLavadero'){
-          // console.log(reloj)
           const indiceFinalTexto = evento.substring(evento.length-1,evento.length)
           const horaFin = finAtencionServicio(Lavadero, 'Lavadero', indiceFinalTexto, reloj, lavaderos, valoresFormulario.tasaAtencionLavadero)
-          // console.log(`RELOJ: ${reloj} - EVENTO: ${evento} - IndFinal: ${indiceFinalTexto} - HORAFIN: ${horaFin}}]`)
 
           if(horaFin){
             horasImportantes[`finAtencionLavadero${indiceFinalTexto}`] = horaFin
@@ -852,10 +741,8 @@ function App() {
             horasImportantes[`finAtencionLavadero${indiceFinalTexto}`] = null
           }
         } else if(evento.substring(0,evento.length-1) == 'finAtencionMantenimiento'){
-          // console.log(reloj)
           const indiceFinalTexto = evento.substring(evento.length-1,evento.length)
           const horaFin = finAtencionServicio(MantenimientoRapido, 'Mantenimiento', indiceFinalTexto, reloj, mantenimientos, valoresFormulario.tasaAtencionMantenimiento)
-          // console.log(`RELOJ: ${reloj} - EVENTO: ${evento} - IndFinal: ${indiceFinalTexto} - HORAFIN: ${horaFin}}]`)
 
           if(horaFin){
             horasImportantes[`finAtencionMantenimiento${indiceFinalTexto}`] = horaFin
@@ -863,10 +750,8 @@ function App() {
             horasImportantes[`finAtencionMantenimiento${indiceFinalTexto}`] = null
           }
         } else if(evento.substring(0,evento.length-1) == 'finAtencionCaja'){
-          // console.log(reloj)
           const indiceFinalTexto = evento.substring(evento.length-1,evento.length)
           const horaFin = finAtencionServicio(Cajero, 'Caja', indiceFinalTexto, reloj, cajeros, valoresFormulario.tasaAtencionCajero)
-          // console.log(`RELOJ: ${reloj} - EVENTO: ${evento} - IndFinal: ${indiceFinalTexto} - HORAFIN: ${horaFin}}]`)
 
           if(horaFin){
             horasImportantes[`finAtencionCaja${indiceFinalTexto}`] = horaFin
@@ -875,66 +760,34 @@ function App() {
           }
         }
 
-        // const a = 'finAtencionKiosco1'
-        // console.log(a.substring(0,a.length-1)) 
-        // console.log(a.substring(a.length-1,a.length))
-        // console.log(reloj)
-
         const estadosSurtidores = surtidores.map((surtidor) => surtidor.estado);
         const horaFinSurtidores = [horasImportantes.finAtencionCombustible1,
           horasImportantes.finAtencionCombustible2,
           horasImportantes.finAtencionCombustible3,
           horasImportantes.finAtencionCombustible4,
         ]
-        // const horaFinSurtidores = Surtidor.colaComun
-        //                           .filter(cliente => cliente.servidorEnElQueEsta !== null && cliente.horaFinAtencion !== null)
-        //                           .map(cliente => cliente.horaFinAtencion);
-        // console.log('surtidor')
-        // console.log(Surtidor.colaComun.map(c => c))
-        // console.log(horaFinSurtidores)
+
 
         const estadosLavaderos = lavaderos.map((lavadero) => lavadero.estado);
         const horaFinLavaderos = [horasImportantes.finAtencionLavadero1,
           horasImportantes.finAtencionLavadero2
         ]
-        // const horaFinLavaderos = Lavadero.colaComun
-        //                           .filter(cliente => cliente.servidorEnElQueEsta !== null && cliente.horaFinAtencion !== null)
-        //                           .map(cliente => cliente.horaFinAtencion);
-        // console.log('lavaderp')
-        // console.log(Lavadero.colaComun.map(c => c))
-        // console.log(horaFinLavaderos)
 
         const estadosMantenimiento = mantenimientos.map((mantenimiento) => mantenimiento.estado);
         const horaFinMantenimiento = [horasImportantes.finAtencionMantenimiento1,
           horasImportantes.finAtencionMantenimiento2
         ]
-        // const horaFinMantenimiento = MantenimientoRapido.colaComun
-        //                           .filter(cliente => cliente.servidorEnElQueEsta !== null && cliente.horaFinAtencion !== null)
-        //                           .map(cliente => cliente.horaFinAtencion);
-        // console.log('mantenimi')
-        // console.log(MantenimientoRapido.colaComun.map(c => c))
-        // console.log(horaFinMantenimiento)
+
 
         const estadosCaja = cajeros.map((caja) => caja.estado);
         const horaFinCaja = [horasImportantes.finAtencionCaja1,
           horasImportantes.finAtencionCaja2
         ]
-        // const horaFinCaja = Cajero.colaComun
-        //                           .filter(cliente => cliente.servidorEnElQueEsta !== null && cliente.horaFinAtencion !== null)
-        //                           .map(cliente => cliente.horaFinAtencion);
-        // console.log('caja')
-        // console.log(Cajero.colaComun.map(c => c))
-        // console.log(horaFinCaja)
+
 
         const estadosKiosco = kioscos.map((kisoco) => kisoco.estado);
         const horaFinKiosco = [horasImportantes.finAtencionKiosco1]
-        // const horaFinKiosco = Kiosco.colaComun
-        //                           .filter(cliente => cliente.servidorEnElQueEsta !== null && cliente.horaFinAtencion !== null)
-        //                           .map(cliente => cliente.horaFinAtencion);
 
-        // console.log('kisoco')
-        // console.log(Kiosco.colaComun.map(c => c))
-        // console.log(horaFinKiosco)
 
         const cantClinesEnColaPorServicio = {
           'Surtidor': Surtidor.colaComun.length < 4 ? 0 : Surtidor.colaComun.length - 4,
@@ -943,18 +796,13 @@ function App() {
           'Caja': Cajero.colaComun.length < 2 ? 0 : Cajero.colaComun.length - 2,
           'Kiosco': Kiosco.colaComun.length < 1 ? 0 : Kiosco.colaComun.length - 1,
         }
-        // Encuentra el tamaño mínimo de la cola
         const minCola = Math.min(...Object.values(cantClinesEnColaPorServicio));
 
-        // Filtra los servicios que tienen una cola con el tamaño mínimo
         const serviciosConMenorCola = Object.keys(cantClinesEnColaPorServicio)
           .filter(servicio => cantClinesEnColaPorServicio[servicio] === minCola);
 
-        // Devuelve los nombres de los servicios con la menor cola, separados por "-"
         const resultadoMenorCola = serviciosConMenorCola.join('-');
         
-        // console.log(Kiosco.colaComun.filter(c => c.horaFinAtencion == null).map(cliente => reloj - cliente.horaLlegada))
-
         acTiempoOcupacionCombustible += estadosSurtidoresAnterior.some(estado => estado == 'Ocupado') ? reloj -  relojAnterior: 0
         acTiempoOcupacionLavadero += estadosSLavaderoAnterior.some(estado => estado == 'Ocupado') ? reloj -  relojAnterior: 0
         acTiempoOcupacionMantenimiento += estadosMantenimientoAnterior.some(estado => estado == 'Ocupado') ? reloj -  relojAnterior: 0
@@ -966,8 +814,8 @@ function App() {
 
         const serviciosConMayorCola = Object.keys(cantClinesEnColaPorServicio)
           .filter(servicio => cantClinesEnColaPorServicio[servicio] === maxCola);
-        // Devuelve los nombres de los servicios con la menor cola, separados por "-"
         const resultadoMayorCola = serviciosConMayorCola.join('-');
+
 
 
         tabla.push({
@@ -1071,6 +919,9 @@ function App() {
           acClientesAtendidosKiosco: acClientesAtendidosKiosco,
 
           servicioConMasCola: resultadoMayorCola,
+
+          clientesSistema: JSON.parse(JSON.stringify(clientesDelSistemaT))
+          // clientesSistema: clientesDelSistemaT.map(c => c)
         })
       }
 
@@ -1080,6 +931,7 @@ function App() {
       estadosCajaAnterior = cajeros.map((x) => x.estado);
       estadosKioscoAnterior = kioscos.map((x) => x.estado);
       relojAnterior = reloj;
+
 
     }
 
@@ -1107,10 +959,8 @@ function App() {
     ];
     
     const valoresFiltrados = valores.filter(valor => !isNaN(valor));
-    // console.log(valoresFiltrados)
 
     const menorValor = Math.min(...valoresFiltrados);
-    // console.log(menorValor)
     return menorValor;
   };
 
@@ -1247,6 +1097,9 @@ function App() {
                 <th colSpan="10">AC tiempo ocupación</th>
                 <th colSpan="5">Cantidad de clientes atendidos</th>
                 <th colSpan="1"></th>
+
+                {/* <th colSpan="1000">CLIENTES</th> */}
+
               </tr>
               <tr>
                 <th>Fila</th>
@@ -1346,6 +1199,9 @@ function App() {
                 <th>Kiosco</th>
 
                 <th>Servicio mas lento (con mas cola)</th>
+
+                {/* <th>Estado</th>
+                <th>Hora Llegada</th> */}
               </tr>
             </thead>
             <tbody>
@@ -1457,18 +1313,15 @@ function App() {
                     <td>{fila.acClientesAtendidosKiosco}</td>
 
                     <td>{fila.servicioConMasCola}</td>
-
                     
-
-                    {/* <td>{reloj.toFixed(2)}</td>
-                    <td>{llegadaClienteCombustible.RND.toFixed(2)}</td>
-                    <td>{llegadaClienteCombustible.tiempoEntreLLegadas.toFixed(2)}</td>
-                    <td>{llegadaClienteCombustible.proximaLlegada.toFixed(2)}</td>
-                    <td colSpan="4"></td>
-                    {surtidores.map((surtidor, index) => (
-                      <td key={index}>{surtidor.estado}</td>
-                    ))}
-                    <td>{Surtidor.colaComun.length}</td> */}
+                    {/* {fila.clientesSistema.map((cliente, indexCliente) => {
+                      return(
+                        <>
+                          <td>{cliente.estado}</td>
+                          <td>{cliente.horaLlegada ? parseFloat(cliente.horaLlegada).toFixed(4) : ''}</td>
+                        </>
+                      )
+                      })} */}
                   </tr> 
                 )}
               })}
@@ -1476,52 +1329,6 @@ function App() {
           </table>
         </div>
       }
-      
-      
-      {/* EJEMPLO SURITDOR {}{}{{}{}{}}{{}{}}{}{}{}{{}{}{}}{{}}{{}{}}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{{}}{}{{}}{{}}{}{{}}{}{}{{}{}}{{}{}}{}{}{{}} */}
-        {/* <div>
-          <h1>Surtidores</h1>
-          {surtidores.map((surtidor, index) => (
-            <div key={index}>
-              <p>Surtidor {index + 1}</p>
-              <p>Estado: {surtidor.estado}</p>
-              <button onClick={() => cambiarEstadoSurtidor(index)}>
-                Cambiar a {surtidor.estado === 'Libre' ? 'Ocupado' : 'Libre'}
-              </button>
-            </div>
-          ))}
-          <h2>Cola Común</h2>
-          <ul>
-            {Surtidor.colaComun.map((vehiculo, index) => (
-              <li key={index}>{vehiculo}</li>
-            ))}
-          </ul>
-          <button onClick={() => agregarClienteAColaSurtidor('Vehículo ' + (Surtidor.colaComun.length + 1))}>
-            Agregar Vehículo a la Cola
-          </button>
-        </div> */}
-
-      {/* EJEMPLO CLIENTE {}{}{{}{}{}}{{}{}}{}{}{}{{}{}{}}{{}}{{}{}}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{{}}{}{{}}{{}}{}{{}}{}{}{{}{}}{{}{}}{}{}{{}} */}
-        {/* <div>
-          <h1>Clientes</h1>
-          {clientes.map((cliente, index) => (
-            <div key={index}>
-              <p>Cliente {index + 1}</p>
-              <p>Estado: {cliente.estado}</p>
-              <select
-                value={cliente.estado}
-                onChange={(e) => cambiarEstadoCliente(index, e.target.value)}
-              >
-                {estados.map((estado) => (
-                  <option key={estado} value={estado}>
-                    {estado}
-                  </option>
-                ))}
-              </select>
-            </div>
-          ))}
-          <button onClick={agregarCliente}>Agregar Cliente</button>
-        </div> */}
 
     </>
   )

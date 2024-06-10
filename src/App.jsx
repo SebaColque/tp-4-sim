@@ -84,12 +84,17 @@ class Kiosco {
 
 // CLIENTE - OBJETO TEMPORAL {}{}{{}{}{}}{{}{}}{}{}{}{{}{}{}}{{}}{{}{}}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{{}}{}{{}}{{}}{}{{}}{}{}{{}{}}{{}{}}{}{}{{}}
 class Cliente {
+
+  static contadorClientes = 0;
+
   constructor() {
+    Cliente.contadorClientes++;
     this.estado = '';
     this.horaLlegada = null;
     this.posicionLlegada = null;
     this.servidorEnElQueEsta = null;
     this.horaFinAtencion = null;
+    this.clienteId = Cliente.contadorClientes;
   }
 
   cambiarEstado(nuevoEstado) {
@@ -106,6 +111,13 @@ class Cliente {
   }
   cambiarHoraFinAtencion(nuevaHoraFinAtencion) {
     this.horaFinAtencion = nuevaHoraFinAtencion;
+  }
+  cambiarClienteId(nuevoClienteId) {
+    this.clienteId = nuevoClienteId;
+  }
+
+  static obtenerContadorClientes() {
+    return Cliente.contadorClientes;
   }
 }
 
@@ -230,6 +242,8 @@ function App() {
   let clientesDelSistemaT = []
 
   const agregarClienteAServicio = (listaServicio, nombreClase, clase, setLista, horaFinAtencion, horaActual, finAtencionString) => {
+      console.log(Cliente.obtenerContadorClientes())
+
     let servicioLibreIndex = -1;
 
     for (let i = 0; i < listaServicio.length; i++) {
@@ -243,20 +257,20 @@ function App() {
 
     if (servicioLibreIndex !== -1) {
       listaServicio[servicioLibreIndex].cambiarEstado('Ocupado');
-      nuevoCliente.cambiarEstado(`SA${nombreClase}-${servicioLibreIndex + 1}`);
+      nuevoCliente.cambiarEstado(`Cliente ${nuevoCliente.clienteId}-SA${nombreClase}-${servicioLibreIndex + 1}`);
       nuevoCliente.cambiarHoraFinAtencion(horaFinAtencion);
       nuevoCliente.cambiarServidorEnElQueEsta(servicioLibreIndex)
     } else {
-      nuevoCliente.cambiarEstado(`EA${nombreClase}`);
+      nuevoCliente.cambiarEstado(`Cliente ${nuevoCliente.clienteId}-EA${nombreClase}`);
     }
 
     nuevoCliente.cambiarPosicionLlegada(clase.colaComun.length);
     nuevoCliente.cambiarHoraLlegada(horaActual);
 
     clase.colaComun.push(nuevoCliente);
-    // setClientes([...clientes, nuevoCliente]);
-    // clientesDelSistemaT.push({...nuevoCliente})
-    // setClientesDelSistema([...clientesDelSistema, nuevoCliente])
+    setClientes([...clientes, nuevoCliente]);
+    clientesDelSistemaT.push({...nuevoCliente})
+    setClientesDelSistema([...clientesDelSistema, nuevoCliente])
     setLista([...listaServicio]);
 
     if(nombreClase == 'Surtidor'){
@@ -289,31 +303,68 @@ function App() {
 
 
   function compararObjetos(objeto1, objeto2) {
-    if (objeto1 === objeto2) return true;
-    if (objeto1 === null || objeto2 === null) return false;
-    if (typeof objeto1 !== typeof objeto2) return false;
-
-    if (typeof objeto1 !== 'object') return objeto1 === objeto2;
-
-    if (Array.isArray(objeto1) !== Array.isArray(objeto2)) return false;
-
-    if (Array.isArray(objeto1)) {
-        if (objeto1.length !== objeto2.length) return false;
-        for (let i = 0; i < objeto1.length; i++) {
-            if (!compararObjetos(objeto1[i], objeto2[i])) return false;
+    // Comprobar si ambos objetos son nulos
+    if (objeto1 === null && objeto2 === null) {
+      return true;
+    }
+  
+    // Comprobar si solo uno de los objetos es nulo
+    if (objeto1 === null || objeto2 === null) {
+      return false;
+    }
+  
+    // Comprobar si los tipos de los objetos son diferentes
+    if (typeof objeto1 !== typeof objeto2) {
+      return false;
+    }
+  
+    // Si son objetos simples, comparar valores primitivos
+    if (typeof objeto1 === 'string' || typeof objeto1 === 'number' || typeof objeto1 === 'boolean') {
+      return objeto1 === objeto2;
+    }
+  
+    // Si son arrays, comparar recursivamente cada elemento
+    if (Array.isArray(objeto1) && Array.isArray(objeto2)) {
+      if (objeto1.length !== objeto2.length) {
+        return false;
+      }
+  
+      for (let i = 0; i < objeto1.length; i++) {
+        if (!compararObjetos(objeto1[i], objeto2[i])) {
+          return false;
         }
-        return true;
+      }
+  
+      return true;
     }
+  }
 
-    const keys1 = Object.keys(objeto1);
-    const keys2 = Object.keys(objeto2);
-    if (keys1.length !== keys2.length) return false;
+//   function compararObjetos(objeto1, objeto2) {
+//     if (objeto1 === objeto2) return true;
+//     if (objeto1 === null || objeto2 === null) return false;
+//     if (typeof objeto1 !== typeof objeto2) return false;
 
-    for (let key of keys1) {
-        if (!keys2.includes(key) || !compararObjetos(objeto1[key], objeto2[key])) return false;
-    }
-    return true;
-}
+//     if (typeof objeto1 !== 'object') return objeto1 === objeto2;
+
+//     if (Array.isArray(objeto1) !== Array.isArray(objeto2)) return false;
+
+//     if (Array.isArray(objeto1)) {
+//         if (objeto1.length !== objeto2.length) return false;
+//         for (let i = 0; i < objeto1.length; i++) {
+//             if (!compararObjetos(objeto1[i], objeto2[i])) return false;
+//         }
+//         return true;
+//     }
+
+//     const keys1 = Object.keys(objeto1);
+//     const keys2 = Object.keys(objeto2);
+//     if (keys1.length !== keys2.length) return false;
+
+//     for (let key of keys1) {
+//         if (!keys2.includes(key) || !compararObjetos(objeto1[key], objeto2[key])) return false;
+//     }
+//     return true;
+// }
 
   const finAtencionServicio = (clase, nombreServicio, indiceServicio, reloj, servicios, tasaAtencionServicio) => {
     let horaFin 
@@ -326,6 +377,7 @@ function App() {
 
     const intercambiar = clase.colaComun.length > servicios.length
     const clienteEliminado = clase.colaComun.splice(indiceClienteEliminadoServicio, 1)[0];
+    // console.log(clienteEliminado)
 
     // const clientesMap = new Map(clientesDelSistemaT.map(cliente => [cliente.horaLlegada, cliente]));
     // const clienteEnElSistema = clientesDelSistemaT.map(c => c).find(cl => compararObjetos(clienteEliminado, cl))
@@ -333,14 +385,19 @@ function App() {
     // const clienteEnElSistema = Array.from(clientesMap.values()).find(cl => equal(clienteEliminado, cl));
     // const clienteEnElSistema = Array.from(clientesMap.values()).find(cl => _.isEqual(clienteEliminado, cl));
     // const clienteEnElSistema = clientesMap.get(clienteEliminado.horaLlegada);
-    // const clienteEnElSistema = clientesDelSistemaT.find(c => c.horaLlegada == clienteEliminado.horaLlegada)
+    
+    const clienteEnElSistema = clientesDelSistemaT.find(c => c.horaLlegada == clienteEliminado.horaLlegada)
+    // const clienteEnElSistema = clientesDelSistemaT.findIndex(c => c.horaLlegada == clienteEliminado.horaLlegada)
+    // const clienteEnElSistema = clientesDelSistemaT.map(c => c).findIndex(cl => compararObjetos(clienteEliminado, cl))
+    // console.log(clientesDelSistemaT.map(c=>c))
+    // console.log(clienteEnElSistema)
 
-
-    // if(clienteEnElSistema){
-    //   // clienteEnElSistema = null
-    //   clienteEnElSistema['estado'] = ''
-    //   clienteEnElSistema['horaLlegada'] = ''
-    // }
+    if(clienteEnElSistema){
+      clientesDelSistemaT.splice(clienteEnElSistema, 1)
+      // clienteEnElSistema = null
+      // clienteEnElSistema['estado'] = ''
+      // clienteEnElSistema['horaLlegada'] = ''
+    }
 
     clienteEliminado.cambiarEstado('')
     clienteEliminado.cambiarHoraLlegada('')
@@ -370,18 +427,19 @@ function App() {
         // const clienteEnElSistema = Array.from(clientesMap.values()).find(cl => equal(clienteEliminado, cl));
         // const clienteEnElSistema = Array.from(clientesMap.values()).find(cl => _.isEqual(clienteEliminado, cl));
         // const clienteEnElSistema = clientesMap.get(clienteEliminado.horaLlegada);
-        // const clienteEnElSistema = clientesDelSistemaT.find(c => c.horaLlegada == clienteEliminado.horaLlegada)
+
+        const clienteEnElSistema = clientesDelSistemaT.find(c => c.horaLlegada == siguienteCliente.horaLlegada)
 
 
         servicios[indiceServicio-1].cambiarEstado('Ocupado');
         siguienteCliente.cambiarEstado(`SA${nombreServicio}-${indiceServicio}`)
         siguienteCliente.cambiarServidorEnElQueEsta(indiceServicio-1)
         horaFin = parseFloat((parseFloat(reloj) + parseFloat(1/tasaAtencionServicio)))
-          // if(clienteEnElSistema){
-          //   clienteEnElSistema['estado'] = `SA${nombreServicio}-${indiceServicio}`
-          //   clienteEnElSistema['servidorEnElQueEsta'] = indiceServicio-1
-          //   clienteEnElSistema['horaFinAtencion'] = horaFin
-          // }
+          if(clienteEnElSistema){
+            clienteEnElSistema['estado'] = `Cliente ${clienteEnElSistema.clienteId}-SA${nombreServicio}-${indiceServicio}`
+            clienteEnElSistema['servidorEnElQueEsta'] = indiceServicio-1
+            clienteEnElSistema['horaFinAtencion'] = horaFin
+          }
         siguienteCliente.cambiarHoraFinAtencion(horaFin) 
 
 
@@ -1098,7 +1156,7 @@ function App() {
                 <th colSpan="5">Cantidad de clientes atendidos</th>
                 <th colSpan="1"></th>
 
-                {/* <th colSpan="1000">CLIENTES</th> */}
+                <th colSpan="1000">CLIENTES</th>
 
               </tr>
               <tr>
@@ -1200,8 +1258,8 @@ function App() {
 
                 <th>Servicio mas lento (con mas cola)</th>
 
-                {/* <th>Estado</th>
-                <th>Hora Llegada</th> */}
+                <th>Estado</th>
+                <th>Hora Llegada</th>
               </tr>
             </thead>
             <tbody>
@@ -1314,14 +1372,14 @@ function App() {
 
                     <td>{fila.servicioConMasCola}</td>
                     
-                    {/* {fila.clientesSistema.map((cliente, indexCliente) => {
+                    {fila.clientesSistema.map((cliente, indexCliente) => {
                       return(
                         <>
                           <td>{cliente.estado}</td>
                           <td>{cliente.horaLlegada ? parseFloat(cliente.horaLlegada).toFixed(4) : ''}</td>
                         </>
                       )
-                      })} */}
+                      })}
                   </tr> 
                 )}
               })}

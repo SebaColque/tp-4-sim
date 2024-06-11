@@ -242,7 +242,7 @@ function App() {
   let clientesDelSistemaT = []
 
   const agregarClienteAServicio = (listaServicio, nombreClase, clase, setLista, horaFinAtencion, horaActual, finAtencionString) => {
-      console.log(Cliente.obtenerContadorClientes())
+      // console.log(Cliente.obtenerContadorClientes())
 
     let servicioLibreIndex = -1;
 
@@ -268,9 +268,18 @@ function App() {
     nuevoCliente.cambiarHoraLlegada(horaActual);
 
     clase.colaComun.push(nuevoCliente);
-    setClientes([...clientes, nuevoCliente]);
-    clientesDelSistemaT.push({...nuevoCliente})
-    setClientesDelSistema([...clientesDelSistema, nuevoCliente])
+    // setClientes([...clientes, nuevoCliente]);
+    // clientesDelSistemaT.push({...nuevoCliente})
+
+
+    // !!!!!!
+    // clientesDelSistemaT = clientesDelSistemaT.filter(cl => cl.estado !== '')
+    // console.log(clientesDelSistemaT)
+    // clientesDelSistemaT.push(nuevoCliente)
+
+
+
+    // setClientesDelSistema([...clientesDelSistema, nuevoCliente])
     setLista([...listaServicio]);
 
     if(nombreClase == 'Surtidor'){
@@ -386,18 +395,20 @@ function App() {
     // const clienteEnElSistema = Array.from(clientesMap.values()).find(cl => _.isEqual(clienteEliminado, cl));
     // const clienteEnElSistema = clientesMap.get(clienteEliminado.horaLlegada);
     
-    const clienteEnElSistema = clientesDelSistemaT.find(c => c.horaLlegada == clienteEliminado.horaLlegada)
+    // clientesDelSistemaT = clientesDelSistemaT.filter(cl => cl.estado !== '')
+
+    // const clienteEnElSistema = clientesDelSistemaT.find(c => c.horaLlegada == clienteEliminado.horaLlegada)
     // const clienteEnElSistema = clientesDelSistemaT.findIndex(c => c.horaLlegada == clienteEliminado.horaLlegada)
     // const clienteEnElSistema = clientesDelSistemaT.map(c => c).findIndex(cl => compararObjetos(clienteEliminado, cl))
     // console.log(clientesDelSistemaT.map(c=>c))
-    // console.log(clienteEnElSistema)
+    // console.log(clientesDelSistemaT)
 
-    if(clienteEnElSistema){
-      clientesDelSistemaT.splice(clienteEnElSistema, 1)
-      // clienteEnElSistema = null
-      // clienteEnElSistema['estado'] = ''
-      // clienteEnElSistema['horaLlegada'] = ''
-    }
+    // if(clienteEnElSistema){
+    //   clientesDelSistemaT.splice(clienteEnElSistema, 1)
+    //   // clienteEnElSistema = null
+    //   // clienteEnElSistema['estado'] = ''
+    //   // clienteEnElSistema['horaLlegada'] = ''
+    // }
 
     clienteEliminado.cambiarEstado('')
     clienteEliminado.cambiarHoraLlegada('')
@@ -428,18 +439,18 @@ function App() {
         // const clienteEnElSistema = Array.from(clientesMap.values()).find(cl => _.isEqual(clienteEliminado, cl));
         // const clienteEnElSistema = clientesMap.get(clienteEliminado.horaLlegada);
 
-        const clienteEnElSistema = clientesDelSistemaT.find(c => c.horaLlegada == siguienteCliente.horaLlegada)
+        // const clienteEnElSistema2 = clientesDelSistemaT.find(c => c.horaLlegada == siguienteCliente.horaLlegada)
 
 
         servicios[indiceServicio-1].cambiarEstado('Ocupado');
-        siguienteCliente.cambiarEstado(`SA${nombreServicio}-${indiceServicio}`)
+        siguienteCliente.cambiarEstado(`Cliente ${siguienteCliente.clienteId}-SA${nombreServicio}-${indiceServicio}`)
         siguienteCliente.cambiarServidorEnElQueEsta(indiceServicio-1)
         horaFin = parseFloat((parseFloat(reloj) + parseFloat(1/tasaAtencionServicio)))
-          if(clienteEnElSistema){
-            clienteEnElSistema['estado'] = `Cliente ${clienteEnElSistema.clienteId}-SA${nombreServicio}-${indiceServicio}`
-            clienteEnElSistema['servidorEnElQueEsta'] = indiceServicio-1
-            clienteEnElSistema['horaFinAtencion'] = horaFin
-          }
+          // if(clienteEnElSistema2){
+          //   clienteEnElSistema2['estado'] = `Cliente ${clienteEnElSistema2.clienteId}-SA${nombreServicio}-${indiceServicio}`
+          //   clienteEnElSistema2['servidorEnElQueEsta'] = indiceServicio-1
+          //   clienteEnElSistema2['horaFinAtencion'] = horaFin
+          // }
         siguienteCliente.cambiarHoraFinAtencion(horaFin) 
 
 
@@ -468,6 +479,8 @@ function App() {
   let acTiempoOcupacionMantenimiento = 0
   let acTiempoOcupacionCaja = 0
   let acTiempoOcupacionKiosco = 0
+
+  let cantidadClientes = 0
   
   const generarTabla = () => {
     const tabla = [];
@@ -519,9 +532,13 @@ function App() {
       let llegadaClienteCajaTiempoEntreLlegadas
 
       let rndVaKiosco
-      
 
+
+      // console.log(i)
+      
+      
       if(i == 0){
+
         evento = 'Inicialización'
         reloj = 0
 
@@ -647,7 +664,7 @@ function App() {
 
         // console.log(i % 1000 == 0 ? i : '')
         // if(i % 1000 == 0){
-        //   // console.log(clientesDelSistemaT)
+        //   // console.log(cods)
         //   clientesDelSistemaT.splice(0, 500);
         //   // console.log(clientesDelSistemaT)
         // }
@@ -874,7 +891,14 @@ function App() {
           .filter(servicio => cantClinesEnColaPorServicio[servicio] === maxCola);
         const resultadoMayorCola = serviciosConMayorCola.join('-');
 
+        // console.log(reloj)
+        // console.log(clientesDelSistemaT.map(c=>c))
+        // clientesDelSistemaT = clientesDelSistemaT.filter(cl => cl.estado !== '')
+        // console.log(clientesDelSistemaT.map(c=>c))
 
+        const clS = [...Surtidor.colaComun].concat([...Lavadero.colaComun]).concat([...MantenimientoRapido.colaComun]).concat([...Cajero.colaComun]).concat([...Kiosco.colaComun])
+        // cantidadClientes = clS.filter(c=>c.estado).length
+        // console.log(clS)
 
         tabla.push({
           evento: evento,
@@ -978,7 +1002,8 @@ function App() {
 
           servicioConMasCola: resultadoMayorCola,
 
-          clientesSistema: JSON.parse(JSON.stringify(clientesDelSistemaT))
+          // clientesSistema: JSON.parse(JSON.stringify(clientesDelSistemaT))
+          clientesSistema: JSON.parse(JSON.stringify(clS))
           // clientesSistema: clientesDelSistemaT.map(c => c)
         })
       }
@@ -1057,7 +1082,7 @@ function App() {
         </label>
         <br />
         <label>
-          Tasa de personas a atender por hora por nuevo servicio:
+          Tasa de personas a atender por hora por kiosco:
           <input type="number" name="tasaAtencionKiosco" value={valoresFormulario.tasaAtencionKiosco} onChange={handleChange} />
         </label>
         <br />
@@ -1093,11 +1118,11 @@ function App() {
             <thead>
               <tr className='se'>
                 <th colSpan="28"></th>
-                <th colSpan="5">SURTIDOR</th>
-                <th colSpan="3">LAVADERO</th>
-                <th colSpan="3">MANTENIMIENTO</th>
-                <th colSpan="3">CAJERO</th>
-                <th colSpan="2">KIOSCO</th>
+                <th colSpan="5" className='surtidor-p'>SURTIDOR</th>
+                <th colSpan="3" className='lavadero-p'>LAVADERO</th>
+                <th colSpan="3" className='mantenimiento-p'>MANTENIMIENTO</th>
+                <th colSpan="3" className='cajero-p'>CAJERO</th>
+                <th colSpan="2" className='kiosco-p'>KIOSCO</th>
                 
                 <th></th>
 
@@ -1107,6 +1132,8 @@ function App() {
                 <th colSpan="10"></th>
                 <th colSpan="5"></th>
                 <th colSpan="1"></th>
+
+                <th colSpan="1000" className='clientes'></th>
               </tr>
               <tr>
                 <th colSpan="3"></th>
@@ -1156,7 +1183,7 @@ function App() {
                 <th colSpan="5">Cantidad de clientes atendidos</th>
                 <th colSpan="1"></th>
 
-                <th colSpan="1000">CLIENTES</th>
+                <th colSpan="1000" className='clientes'>CLIENTES</th>
 
               </tr>
               <tr>
@@ -1258,8 +1285,121 @@ function App() {
 
                 <th>Servicio mas lento (con mas cola)</th>
 
+
                 <th>Estado</th>
                 <th>Hora Llegada</th>
+
+
+                {/* {Array.from({ length: cantidadClientes }, (_, index) => (
+                  <>
+                    <th key={index}>Estado</th>
+                    <th key={index}>Hora Llegada</th>
+                  </>
+                ))} */}
+
+                <>
+                
+                <th>Estado</th>
+                <th>Hora Llegada</th>
+                
+                <th>Estado</th>
+                <th>Hora Llegada</th>
+                
+                <th>Estado</th>
+                <th>Hora Llegada</th>
+                
+                <th>Estado</th>
+                <th>Hora Llegada</th>
+                
+                <th>Estado</th>
+                <th>Hora Llegada</th>
+                
+                <th>Estado</th>
+                <th>Hora Llegada</th>
+                
+                <th>Estado</th>
+                <th>Hora Llegada</th>
+                
+                <th>Estado</th>
+                <th>Hora Llegada</th>
+                
+                <th>Estado</th>
+                <th>Hora Llegada</th>
+                
+                <th>Estado</th>
+                <th>Hora Llegada</th>
+                
+                <th>Estado</th>
+                <th>Hora Llegada</th>
+                
+                <th>Estado</th>
+                <th>Hora Llegada</th>
+                
+                <th>Estado</th>
+                <th>Hora Llegada</th>
+                
+                <th>Estado</th>
+                <th>Hora Llegada</th>
+                
+                <th>Estado</th>
+                <th>Hora Llegada</th>
+                
+                <th>Estado</th>
+                <th>Hora Llegada</th>
+                
+                <th>Estado</th>
+                <th>Hora Llegada</th>
+                <th>Estado</th>
+                <th>Hora Llegada</th>
+                
+                <th>Estado</th>
+                <th>Hora Llegada</th>
+                
+                <th>Estado</th>
+                <th>Hora Llegada</th>
+                
+                <th>Estado</th>
+                <th>Hora Llegada</th>
+                
+                <th>Estado</th>
+                <th>Hora Llegada</th>
+                
+                <th>Estado</th>
+                <th>Hora Llegada</th>
+                
+                <th>Estado</th>
+                <th>Hora Llegada</th>
+                
+                <th>Estado</th>
+                <th>Hora Llegada</th>
+                
+                <th>Estado</th>
+                <th>Hora Llegada</th>
+                
+                <th>Estado</th>
+                <th>Hora Llegada</th>
+                
+                <th>Estado</th>
+                <th>Hora Llegada</th>
+                
+                <th>Estado</th>
+                <th>Hora Llegada</th>
+                
+                <th>Estado</th>
+                <th>Hora Llegada</th>
+                
+                <th>Estado</th>
+                <th>Hora Llegada</th>
+                
+                <th>Estado</th>
+                <th>Hora Llegada</th>
+                
+                <th>Estado</th>
+                <th>Hora Llegada</th>
+                
+                <th>Estado</th>
+                <th>Hora Llegada</th>
+                </>
               </tr>
             </thead>
             <tbody>

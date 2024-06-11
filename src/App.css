@@ -141,31 +141,36 @@ tr:hover{
   height: 2px;
 } */
 
-.menorValor{
+/* .menorValor{
   background-color: rgb(147, 0, 0);
-}
+} */
 
 .ll-c-c,
-.f-a-c{
+.f-a-c,
+.surtidor-p{
   background-color: rgb(186, 216, 227);
   color: black;
 }
 .ll-c-l,
-.f-a-l{
+.f-a-l,
+.lavadero-p{
   background-color: rgb(74, 183, 219);
   color: black;
 }
 .ll-c-m,
-.f-a-m{
+.f-a-m,
+.mantenimiento-p{
   background-color: rgb(4, 141, 187);
   color: black;
 }
 .ll-c-ca,
-.f-a-ca{
+.f-a-ca,
+.cajero-p{
   background-color: rgb(1, 58, 78);
   /* color: black; */
 }
-.ll-c-k
+.ll-c-k,
+.kiosco-p
 {  background-color: rgb(0, 31, 41);
   /* color: black; */
 }
@@ -179,4 +184,9 @@ tr:hover{
 }
 .prox-llegada{
   background-color: rgb(175, 5, 5);
+}
+
+.clientes{
+  background-color: rgb(29, 4, 119);
+  text-align: left;
 }
